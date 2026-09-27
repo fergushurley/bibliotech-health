@@ -1,4 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import Landing from "@/app/landing";
 import HealthApp from "@/app/health-app";
 export default async function Page({
   params,
@@ -7,7 +8,7 @@ export default async function Page({
 }) {
   const { page } = await params;
   const route = "/" + (page ?? []).join("/");
-  if (route === "/") redirect("/priors");
+  if (route === "/") return <Landing />;
   if (
     ![
       "/priors",

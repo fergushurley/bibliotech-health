@@ -3,7 +3,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "BiblioTech Health — All your priors. One intelligence.",
   description:
-    "A synthetic demonstration of patient-owned, evidence-grounded health context.",
+    "BiblioTech connects your medical history across specialties and turns it into evidence-grounded intelligence you can inspect, correct, and carry with you.",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
