@@ -1,0 +1,42 @@
+{
+  "name": "bibliotech-health",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @bibliotech/web",
+    "build": "npm run build --workspace @bibliotech/web",
+    "start": "npm run start --workspace @bibliotech/web",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "gbrain:inspect": "node --env-file-if-exists=.env.local --import tsx scripts/gbrain.ts inspect",
+    "gbrain:verify": "node --env-file-if-exists=.env.local --import tsx scripts/gbrain.ts verify",
+    "health-priors": "node --env-file-if-exists=.env.local --import tsx scripts/health-priors.ts",
+    "rehearse": "node --import tsx scripts/rehearse.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.1.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "5.0.2"
+  }
+}

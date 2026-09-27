@@ -1,4 +1,8 @@
 # Logs
+.data/
+test-results/
+playwright-report/
+.DS_Store
 logs
 *.log
 npm-debug.log*

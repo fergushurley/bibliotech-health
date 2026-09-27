@@ -1,0 +1,33 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "followup-mammogram-2026-09",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://bibliotech.health/demo",
+        "code": "synthetic",
+        "display": "Synthetic demo data"
+      }
+    ]
+  },
+  "status": "final",
+  "subject": {
+    "reference": "Patient/jordan-taylor-synthetic"
+  },
+  "category": [
+    {
+      "text": "Imaging"
+    }
+  ],
+  "code": {
+    "text": "Follow-up mammogram"
+  },
+  "effectiveDateTime": "2026-09-18",
+  "issued": "2026-09-18T12:00:00Z",
+  "conclusion": "Six-month follow-up of the March 12 finding completed. Stable appearance. This report documents completion of the requested interval imaging; future care remains with the treating team.",
+  "basedOn": [
+    {
+      "reference": "ServiceRequest/breast-followup-2026"
+    }
+  ]
+}
