@@ -1,48 +1,77 @@
 # BiblioTech Health
 
-**All your priors. One intelligence.**
+## All your prior test results. Intelligence for your body.
 
-A patient-owned, evidence-grounded health record prototype. This alternative implementation follows the six-screen product specification: Priors, Visit Brief, Evidence, Agents, Memory, and Access.
+BiblioTech connects your medical history across specialties and turns it into evidence-grounded intelligence you can inspect, correct, and carry with you.
 
-The only patient is **Jordan Taylor**, a completely fictional 51-year-old woman. All 25 initial records and the import fixture are explicitly synthetic FHIR R4 data. This prototype surfaces questions for review; it does not provide medical diagnoses.
+Explore a connected medical timeline, prepare questions for your next appointment, inspect the evidence behind every finding, and see your brief change when new information arrives.
+
+![BiblioTech landing page](docs/screenshots/08-landing.png)
+
+**[Watch or download the 108-second demo](docs/bibliotech-demo.mp4)** · **[Demo script](docs/hackathon-demo-script.md)** · **[MIT license](LICENSE)**
+
+## What you can do
+
+- **Connect your history:** explore 25 synthetic records spanning eight years and six specialties.
+- **Prepare a better conversation:** turn labs, imaging, notes, and medications into a short visit brief.
+- **Inspect every finding:** follow evidence links to the underlying FHIR resources and see what remains uncertain.
+- **Update the picture:** import a follow-up report, resolve an open question, and prepare an updated brief.
+- **Review the process:** inspect workflow decisions, rejected claims, and allowed or denied data requests.
+
+This repository contains the landing page and the complete six-screen demo: **Priors → Visit Brief → Evidence → Agents → Memory → Access**.
 
 ## Run locally
 
-Requires Node.js 22 or newer.
+Requires **Node.js 22+** and npm.
 
 ```sh
-npm install
+git clone https://github.com/fergushurley/bibliotech-health.git
+cd bibliotech-health
+npm ci
 npm run dev
 ```
 
-Open **http://127.0.0.1:3101/priors**. Port 3101 keeps this alternative separate from another local prototype. To use another port, run `npm run dev -- --port 3201`.
+Open [http://127.0.0.1:3101](http://127.0.0.1:3101) for the marketing page or [http://127.0.0.1:3101/priors](http://127.0.0.1:3101/priors) for the demo. No credentials are needed for the local workflow. To change the port, use `npm run dev -- --port 3201`.
+
+For a production build running locally:
 
 ```sh
-npm test
-npm run typecheck
 npm run build
 npm start
 ```
 
-This is a single-patient, local demo. Its server binds to loopback. Local FHIR records and the ledger persist in `.data/demo.json`. It is not a multi-user service and has no clinical deployment authentication. Do not put actual patient information into the demo.
+The server binds to loopback. Records and the access ledger persist in `.data/demo.json`; that directory is excluded from Git.
 
 ## Two-minute walkthrough
 
-1. On **Priors**, inspect a source or filter the 25-record timeline. Select **Prepare My Visit**.
-2. The brief contains three evidence-supported questions: imaging follow-up, cross-specialty cardiovascular context, and atorvastatin dose reconciliation.
-3. Open the cardiovascular **View Evidence** link. The evidence map connects one imaging report, five lipid results, and four blood-pressure measurements. Every source opens its actual FHIR resource.
-4. On **Agents**, inspect the actual run, timestamps, five deterministic steps, and rejected candidates.
-5. On **Memory**, import `followup-mammogram-2024-09.json`. The report matches the March recommendation and invalidates the old brief immediately.
-6. When GBrain is connected, the structured follow-up memory becomes resolved after a write and an independent recall. Select **Start Fresh Session**, then prepare another brief. The missing-report question no longer appears.
-7. Open **Access** and inspect the denied Research Agent request: the policy check returned zero records.
+1. Open **Priors**, filter the timeline, and inspect a source record.
+2. Select **Prepare My Visit**. The brief surfaces three questions: an imaging follow-up, cross-specialty cardiovascular context, and an atorvastatin dose discrepancy.
+3. Open the cardiovascular **View Evidence** link. Inspect the imaging observation, five lipid results, and four blood-pressure measurements behind the finding.
+4. Open **Agents** to inspect the five workflow stages and rejected candidates. In **Access**, inspect the denied Research Agent request, which returned zero records.
+5. In **Memory**, select **Import New Record** and import the supplied synthetic follow-up report. It matches the original imaging recommendation and invalidates the old brief.
+6. Select **Start Fresh Session**, then **Prepare My Visit** again. The imported report persists and the outdated missing-report question no longer appears.
 
-The local workflow also works without GBrain. In that case the app explicitly reports that persistent memory is unavailable. Local record persistence is never presented as proof of a GBrain update.
+The supplied patient, Jordan Taylor, and every clinical record are fictional. The import accepts only the supplied fixture, not arbitrary medical uploads.
 
-## Connect real GBrain memory
+## GBrain and QM
 
-Use a dedicated synthetic-only GBrain workspace. In GBrain, add that workspace's Memory application to a client with **Full** permission and create a connection. Follow the [official memory connection guide](https://gbrain.io/docs/workspace/memory-anywhere).
+| Component | Role | Current status |
+| --- | --- | --- |
+| **GBrain** | Durable, evidence-linked memory across sessions | Real MCP connector implemented. Requires a configured connection; successful writes are independently recalled and verified. |
+| **QM** | Repeatable orchestration of the Health Priors workflow | Planned integration. No live QM runtime is connected in this version. |
+| **Local workflow** | Timeline, follow-up, medication, cross-specialty, and reviewer stages | Implemented with deterministic rules. No LLM calls. |
 
-Copy `.env.example` to `.env.local`, then set the server-only connection values:
+The video demonstrates **local record persistence**. It does not demonstrate a live GBrain connection or QM orchestration. Offline tests verify adapter behavior, not access to an external account.
+
+### Connect GBrain
+
+Use a dedicated synthetic-only workspace. Follow the [GBrain memory connection guide](https://gbrain.io/docs/workspace/memory-anywhere): add the workspace’s Memory application to a client with **Full** permission and create a connection.
+
+```sh
+cp .env.example .env.local
+```
+
+Set the server-only values in `.env.local`:
 
 ```dotenv
 GBRAIN_TOKEN=your-connection-token
@@ -51,52 +80,62 @@ GBRAIN_ENTITY=projects/bibliotech-alternative/demo-jordan-taylor
 GBRAIN_WORKSPACE_URL=
 ```
 
-The optional workspace URL enables **Open in GBrain**. Use the actual URL of your synthetic workspace. Restart the server, select **Demo → Check GBrain Connection**, then prepare a brief or select **Sync Memory**.
+Keep the token private. The optional workspace URL enables **Open in GBrain**. Restart the server, select **Demo → Check GBrain Connection**, then prepare a brief or select **Sync Memory**.
 
-The adapter uses the MCP client SDK, discovers unambiguous `recall`, `remember`, and optional `forget` tools, and requires successful recall before declaring a connection. Structured versioned snapshots are attributed to this demo's namespace, patient, and evidence IDs. A memory write is successful only after a separate recall returns the exact snapshot. Unknown response shapes, unavailable tools, missing write permissions, and transport errors fail visibly. No simulated GBrain adapter is included in the application.
+The adapter discovers `recall`, `remember`, and optional `forget` tools. It validates versioned snapshots against the configured namespace, patient, and evidence IDs. A write succeeds only when a separate recall returns the exact snapshot. Missing permissions, ambiguous tools, malformed responses, and transport failures produce visible errors.
 
-The protocol adapter is implemented and covered by isolated contract tests. **Live GBrain read/write verification requires a configured connection and is not claimed by offline tests or screenshots.** No QM extension is implemented, so no QM badge is displayed.
+Learn more about the planned orchestration platform in the [QM documentation](https://qm.ycombinator.com/).
 
-### Reset behavior
+### Session and reset behavior
 
-- **Start Fresh Session** clears the current run while preserving the records and remote memory. It recalls GBrain again.
-- **Reset Demo** restores the 25 local records and clears local run and access history. GBrain is preserved by default; a subsequent recall can restore a resolved report.
-- **Also reset GBrain demo memory?** requires the explicit checkbox. Only valid snapshots in the configured alternative-demo namespace are expired, using `forget`, then verified absent. Unrelated workspace memory is never reset.
+- **Start Fresh Session** clears the current run, preserves records, and recalls GBrain when connected.
+- **Reset Demo** restores the 25 local records and clears local run and access history. Remote memory is preserved by default and may restore a previously resolved report on recall.
+- **Also reset GBrain demo memory?** requires the explicit checkbox. Only valid snapshots in the configured namespace are expired and verified absent; unrelated workspace memory is not reset.
 
-## How it works
+## Architecture
 
-- `lib/data.ts`: coherent synthetic records and FHIR resources. The downloadable bundle contains the patient and the 25 initial records.
-- `lib/domain.ts`: five conceptual agent responsibilities, exact-purpose access policies, source requirements, uncertainty checks, and unsupported-language rejection.
-- `lib/workflow.ts`: actual streamed execution, import matching, stale-brief invalidation, session boundaries, and remote synchronization.
-- `lib/gbrain.ts`: real MCP connection, structured memory validation, write/read verification, and namespace-scoped reset.
-- `lib/store.ts`: serialized mutations and atomic local writes.
-- `app/health-app.tsx`: the six screens, source drawers, filters, evidence map, import, demo controls, and accessible dialogs.
+Built with **Next.js, React, TypeScript, the MCP client SDK, Vitest, and Playwright**.
 
-The workflow is deterministic. It does not call an LLM or claim to. Its two intentionally unsupported candidates demonstrate the reviewer rules; the research request is a deliberate policy probe, with no external research call. Timing, record counts, accepted/rejected totals, and the access ledger come from actual execution.
+| Path | Purpose |
+| --- | --- |
+| `app/landing.tsx`, `app/landing.css` | Responsive marketing page and interactive before/after preview |
+| `app/health-app.tsx` | Six product screens, source drawers, evidence graph, and demo controls |
+| `app/api/demo/route.ts` | Same-origin API and streamed workflow progress |
+| `lib/data.ts` | Synthetic FHIR records and follow-up fixture |
+| `lib/domain.ts` | Findings, source requirements, uncertainty checks, and access policy |
+| `lib/workflow.ts` | Execution, imports, stale-brief invalidation, and memory synchronization |
+| `lib/gbrain.ts` | MCP connection, memory validation, verified writes, and scoped reset |
+| `lib/store.ts` | Serialized mutations and atomic local storage |
+| `public/fixtures/` | Downloadable synthetic FHIR bundle and import fixture |
+| `tests/` | Domain, workflow, adapter, and browser checks |
 
-The demo import accepts only the supplied synthetic fixture. It does not ingest arbitrary patient uploads.
+Counts, timings, reviewer decisions, and access events come from execution. The intentionally unsupported candidates exercise reviewer rules. The denied research request is a policy probe and makes no external research call.
 
-## Browser verification and screenshots
+## Verification
 
 ```sh
+npm test
+npm run typecheck
+npm run build
+
+# Install the browser once, then run the complete demo walkthrough:
 npx playwright install chromium
 npm run test:e2e
-# Or use an already installed Chrome with an isolated test profile:
+
+# Alternatively, use installed Chrome with an isolated test profile:
 PLAYWRIGHT_CHANNEL=chrome npm run test:e2e
 ```
 
-The browser suite starts an isolated server on port 3102 with a separate data directory and GBrain disabled. It walks through the complete demo, checks source navigation, verifies local persistence after a reload and fresh session, inspects the denied request, checks browser errors, and verifies the phone layout. It captures actual screenshots under `docs/screenshots/`.
+The browser suite starts a separate server on port 3102 with isolated data and GBrain disabled. It verifies source navigation, import and fresh-session behavior, denied access, browser errors, and mobile layout. Actual product screenshots are saved in `docs/screenshots/`.
 
-| Priors | Visit brief |
-|---|---|
-| ![Priors](docs/screenshots/01-priors.png) | ![Visit brief](docs/screenshots/02-visit-brief.png) |
+| Visit brief | Evidence |
+| --- | --- |
+| ![Visit brief](docs/screenshots/02-visit-brief.png) | ![Evidence](docs/screenshots/03-evidence.png) |
 
-| Evidence | Agents |
-|---|---|
-| ![Evidence](docs/screenshots/03-evidence.png) | ![Agents](docs/screenshots/04-agents.png) |
+## Prototype scope
 
-| Memory — disconnected state | Access ledger |
-|---|---|
-| ![Memory](docs/screenshots/05-gbrain-memory.png) | ![Access ledger](docs/screenshots/06-access-ledger.png) |
+This is a **single-patient synthetic demonstration**, not a production clinical service. It has no multi-user authentication and is not ready for actual patient information. Findings are questions for clinician review, not diagnoses or medication recommendations.
 
-These are application screenshots, not generated artwork. The memory screenshot must not be used to claim that an external GBrain integration was verified.
+## License
+
+[MIT](LICENSE).
