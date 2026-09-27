@@ -1,27 +1,196 @@
-import { describe,it,expect } from 'vitest';
-import { initialRecords,followupRecord,cardiacIds,asBundle,PATIENT_ID } from '../lib/data';
-import { authorize,reviewFinding,followupFindings,medicationFindings,crossSpecialtyFindings,absenceCandidate,buildMemory } from '../lib/domain';
-import { decodeSnapshots } from '../lib/gbrain';
-describe('coherent synthetic evidence',()=>{
-  it('contains 25 unique records across six specialties and eight years',()=>{expect(initialRecords).toHaveLength(25);expect(new Set(initialRecords.map(r=>r.id)).size).toBe(25);expect(new Set(initialRecords.map(r=>r.specialty)).size).toBe(6);expect(initialRecords.at(-1)!.date.slice(0,4)).toBe('2018');expect(initialRecords[0].date.slice(0,4)).toBe('2026');expect(initialRecords.some(r=>r.id===followupRecord.id)).toBe(false);});
-  it('labels every FHIR resource synthetic and scopes it to the demo patient',()=>{const bundle=asBundle(initialRecords);expect(bundle.entry).toHaveLength(26);for(const record of initialRecords){expect(record.resource.meta.tag[0].code).toBe('synthetic');expect(record.resource.subject.reference).toBe(`Patient/${PATIENT_ID}`);}});
-  it('surfaces the three supported questions and rejects both unsafe candidates',()=>{const candidates=[...followupFindings(initialRecords),...medicationFindings(initialRecords),...crossSpecialtyFindings(initialRecords),...absenceCandidate(initialRecords)].map(f=>reviewFinding(f,initialRecords));expect(candidates.filter(f=>f.reviewer.passed).map(f=>f.id).sort()).toEqual(['cross-specialty-cardiovascular','follow-up','medication']);expect(candidates.filter(f=>!f.reviewer.passed)).toHaveLength(2);});
-  it('withholds findings with absent or invented sources',()=>{const f=followupFindings(initialRecords)[0];expect(reviewFinding({...f,evidenceIds:[]},initialRecords).reviewer.passed).toBe(false);expect(reviewFinding({...f,evidenceIds:['invented']},initialRecords).reviewer.passed).toBe(false);});
-  it('preserves the difference between no record and no care',()=>{expect(followupFindings(initialRecords)[0].statement).toContain('No matching follow-up report was found');expect(reviewFinding(absenceCandidate(initialRecords)[0],initialRecords).reviewer.reasons.join()).toContain('does not prove');});
-  it('does not infer a cardiovascular signal when one source is missing',()=>{expect(crossSpecialtyFindings(initialRecords.filter(r=>r.id!==cardiacIds[0]))).toEqual([]);});
-  it('does not call falling measurements a rising trend',()=>{const records=structuredClone(initialRecords);records.find(r=>r.id==='OBS-2025-LDL')!.resource.valueQuantity!.value=100;expect(crossSpecialtyFindings(records)).toEqual([]);});
-  it('resolves a matched follow-up while preserving the medication question',()=>{const records=[...initialRecords,followupRecord];expect(followupFindings(records)).toEqual([]);expect(medicationFindings(records)).toHaveLength(1);});
-  it('cannot resolve a recommendation with an older record',()=>{expect(followupFindings([...initialRecords,{...followupRecord,date:'2023-01-01'}])).toHaveLength(1);});
-  it('links resolved memory to both the prior recommendation and imported evidence',()=>{const records=[...initialRecords,followupRecord];const entries=buildMemory([],records,[]);expect(entries[0].status).toBe('resolved');expect(entries[0].evidenceIds).toEqual(['DR-2024-0312','DR-2024-0918']);expect(entries[0].resolvedByEvidenceId).toBe(followupRecord.id);});
+import { describe, it, expect } from "vitest";
+import {
+  initialRecords,
+  followupRecord,
+  cardiacIds,
+  asBundle,
+  PATIENT_ID,
+} from "../lib/data";
+import {
+  authorize,
+  reviewFinding,
+  followupFindings,
+  medicationFindings,
+  crossSpecialtyFindings,
+  absenceCandidate,
+  buildMemory,
+} from "../lib/domain";
+import { decodeSnapshots } from "../lib/gbrain";
+describe("coherent synthetic evidence", () => {
+  it("contains 25 unique records across six specialties and eight years", () => {
+    expect(initialRecords).toHaveLength(25);
+    expect(new Set(initialRecords.map((r) => r.id)).size).toBe(25);
+    expect(new Set(initialRecords.map((r) => r.specialty)).size).toBe(6);
+    expect(initialRecords.at(-1)!.date.slice(0, 4)).toBe("2018");
+    expect(initialRecords[0].date.slice(0, 4)).toBe("2026");
+    expect(initialRecords.some((r) => r.id === followupRecord.id)).toBe(false);
+  });
+  it("labels every FHIR resource synthetic and scopes it to the demo patient", () => {
+    const bundle = asBundle(initialRecords);
+    expect(bundle.entry).toHaveLength(26);
+    for (const record of initialRecords) {
+      expect(record.resource.meta.tag[0].code).toBe("synthetic");
+      expect(record.resource.subject.reference).toBe(`Patient/${PATIENT_ID}`);
+    }
+  });
+  it("surfaces the three supported questions and rejects both unsafe candidates", () => {
+    const candidates = [
+      ...followupFindings(initialRecords),
+      ...medicationFindings(initialRecords),
+      ...crossSpecialtyFindings(initialRecords),
+      ...absenceCandidate(initialRecords),
+    ].map((f) => reviewFinding(f, initialRecords));
+    expect(
+      candidates
+        .filter((f) => f.reviewer.passed)
+        .map((f) => f.id)
+        .sort(),
+    ).toEqual(["cross-specialty-cardiovascular", "follow-up", "medication"]);
+    expect(candidates.filter((f) => !f.reviewer.passed)).toHaveLength(2);
+  });
+  it("withholds findings with absent or invented sources", () => {
+    const f = followupFindings(initialRecords)[0];
+    expect(
+      reviewFinding({ ...f, evidenceIds: [] }, initialRecords).reviewer.passed,
+    ).toBe(false);
+    expect(
+      reviewFinding({ ...f, evidenceIds: ["invented"] }, initialRecords)
+        .reviewer.passed,
+    ).toBe(false);
+  });
+  it("preserves the difference between no record and no care", () => {
+    expect(followupFindings(initialRecords)[0].statement).toContain(
+      "No matching follow-up report was found",
+    );
+    expect(
+      reviewFinding(
+        absenceCandidate(initialRecords)[0],
+        initialRecords,
+      ).reviewer.reasons.join(),
+    ).toContain("does not prove");
+  });
+  it("does not infer a cardiovascular signal when one source is missing", () => {
+    expect(
+      crossSpecialtyFindings(
+        initialRecords.filter((r) => r.id !== cardiacIds[0]),
+      ),
+    ).toEqual([]);
+  });
+  it("does not call falling measurements a rising trend", () => {
+    const records = structuredClone(initialRecords);
+    records.find(
+      (r) => r.id === "OBS-2025-LDL",
+    )!.resource.valueQuantity!.value = 100;
+    expect(crossSpecialtyFindings(records)).toEqual([]);
+  });
+  it("resolves a matched follow-up while preserving the medication question", () => {
+    const records = [...initialRecords, followupRecord];
+    expect(followupFindings(records)).toEqual([]);
+    expect(medicationFindings(records)).toHaveLength(1);
+  });
+  it("cannot resolve a recommendation with an older record", () => {
+    expect(
+      followupFindings([
+        ...initialRecords,
+        { ...followupRecord, date: "2023-01-01" },
+      ]),
+    ).toHaveLength(1);
+  });
+  it("links resolved memory to both the prior recommendation and imported evidence", () => {
+    const records = [...initialRecords, followupRecord];
+    const entries = buildMemory([], records, []);
+    expect(entries[0].status).toBe("resolved");
+    expect(entries[0].evidenceIds).toEqual(["DR-2024-0312", "DR-2024-0918"]);
+    expect(entries[0].resolvedByEvidenceId).toBe(followupRecord.id);
+  });
 });
-describe('deterministic scoped access',()=>{
-  it('denies full-record research and returns no data',()=>{const result=authorize('Research Agent',['Full Record'],'External research','run1','run1',initialRecords);expect(result.event.result).toBe('Denied');expect(result.records).toEqual([]);expect(result.event.recordIds).toEqual([]);});
-  it('enforces exact purposes and expires access at run completion',()=>{expect(authorize('Timeline Agent',['Timeline'],'External research','r','r',initialRecords).event.result).toBe('Denied');expect(authorize('Timeline Agent',['Timeline'],'Prepare brief','r',null,initialRecords).records).toEqual([]);});
-  it('gives the medication agent only medications and notes within scope',()=>{const result=authorize('Medication Agent',['Medications'],'Reconcile medications','r','r',initialRecords);expect(result.event.result).toBe('Allowed');expect(result.records.every(r=>r.category==='Medications')).toBe(true);});
-  it('fails closed for unknown actors and empty scopes',()=>{expect(authorize('Unknown',[],'Prepare brief','r','r',initialRecords).event.result).toBe('Denied');expect(authorize('Timeline Agent',[],'Prepare brief','r','r',initialRecords).event.result).toBe('Denied');});
+describe("deterministic scoped access", () => {
+  it("denies full-record research and returns no data", () => {
+    const result = authorize(
+      "Research Agent",
+      ["Full Record"],
+      "External research",
+      "run1",
+      "run1",
+      initialRecords,
+    );
+    expect(result.event.result).toBe("Denied");
+    expect(result.records).toEqual([]);
+    expect(result.event.recordIds).toEqual([]);
+  });
+  it("enforces exact purposes and expires access at run completion", () => {
+    expect(
+      authorize(
+        "Timeline Agent",
+        ["Timeline"],
+        "External research",
+        "r",
+        "r",
+        initialRecords,
+      ).event.result,
+    ).toBe("Denied");
+    expect(
+      authorize(
+        "Timeline Agent",
+        ["Timeline"],
+        "Prepare brief",
+        "r",
+        null,
+        initialRecords,
+      ).records,
+    ).toEqual([]);
+  });
+  it("gives the medication agent only medications and notes within scope", () => {
+    const result = authorize(
+      "Medication Agent",
+      ["Medications"],
+      "Reconcile medications",
+      "r",
+      "r",
+      initialRecords,
+    );
+    expect(result.event.result).toBe("Allowed");
+    expect(result.records.every((r) => r.category === "Medications")).toBe(
+      true,
+    );
+  });
+  it("fails closed for unknown actors and empty scopes", () => {
+    expect(
+      authorize("Unknown", [], "Prepare brief", "r", "r", initialRecords).event
+        .result,
+    ).toBe("Denied");
+    expect(
+      authorize("Timeline Agent", [], "Prepare brief", "r", "r", initialRecords)
+        .event.result,
+    ).toBe("Denied");
+  });
 });
-describe('remote memory boundaries',()=>{
-  const snapshot={schema:'bibliotech-memory-v1',entity:'demo-namespace',version:'2026-09-27T10:00:00.000Z',entries:buildMemory([], [...initialRecords,followupRecord],[]),importedFollowup:true};
-  it('selects the newest valid snapshot in this demo namespace',()=>{const facts=[{id:1,fact:'BIBLIOTECH_MEMORY_V1\n'+JSON.stringify(snapshot)},{id:2,fact:'BIBLIOTECH_MEMORY_V1\n'+JSON.stringify({...snapshot,version:'2026-09-27T11:00:00.000Z'})}];expect(decodeSnapshots(facts,'demo-namespace')[0].remoteId).toBe('2');});
-  it('does not ingest foreign, malformed, or unsupported remote memory',()=>{const facts=[{id:1,fact:'BIBLIOTECH_MEMORY_V1\n'+JSON.stringify(snapshot)},{fact:'BIBLIOTECH_MEMORY_V1\ninvalid'},{fact:'unrelated memory'}];expect(decodeSnapshots(facts,'another-namespace')).toEqual([]);});
+describe("remote memory boundaries", () => {
+  const snapshot = {
+    schema: "bibliotech-memory-v1",
+    entity: "demo-namespace",
+    version: "2026-09-27T10:00:00.000Z",
+    entries: buildMemory([], [...initialRecords, followupRecord], []),
+    importedFollowup: true,
+  };
+  it("selects the newest valid snapshot in this demo namespace", () => {
+    const facts = [
+      { id: 1, fact: "BIBLIOTECH_MEMORY_V1\n" + JSON.stringify(snapshot) },
+      {
+        id: 2,
+        fact:
+          "BIBLIOTECH_MEMORY_V1\n" +
+          JSON.stringify({ ...snapshot, version: "2026-09-27T11:00:00.000Z" }),
+      },
+    ];
+    expect(decodeSnapshots(facts, "demo-namespace")[0].remoteId).toBe("2");
+  });
+  it("does not ingest foreign, malformed, or unsupported remote memory", () => {
+    const facts = [
+      { id: 1, fact: "BIBLIOTECH_MEMORY_V1\n" + JSON.stringify(snapshot) },
+      { fact: "BIBLIOTECH_MEMORY_V1\ninvalid" },
+      { fact: "unrelated memory" },
+    ];
+    expect(decodeSnapshots(facts, "another-namespace")).toEqual([]);
+  });
 });

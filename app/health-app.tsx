@@ -1,88 +1,2213 @@
-'use client';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, Circle, CircleCheck, Clock3, Database, FileCheck2, FileJson, FileText, Fingerprint, FlaskConical, GitBranch, History, Layers3, LockKeyhole, MoreHorizontal, Pill, Plus, RotateCcw, ScanLine, Search, ShieldCheck, ShieldX, Sparkles, Upload, X, type LucideIcon } from 'lucide-react';
-import { bpRecords, cardiacIds, followupRecord, lipidRecords } from '@/lib/data';
-import type { AccessEvent, Category, DemoState, Finding, HealthMemoryEntry, HealthRecord } from '@/lib/types';
-const navigation=[{url:'/priors',label:'Priors',icon:Layers3},{url:'/brief',label:'Visit Brief',icon:Sparkles},{url:'/agents',label:'Agents',icon:GitBranch},{url:'/memory',label:'Memory',icon:Database},{url:'/access',label:'Access',icon:Fingerprint}];
-const categories=['All','Imaging','Labs','Medications','Notes','Procedures'];
-const categoryIcons:Record<Category,LucideIcon>={Imaging:ScanLine,Labs:FlaskConical,Medications:Pill,Notes:FileText,Procedures:FileCheck2};
-const date=(value:string)=>new Date(value.length===10?value+'T12:00:00':value).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-const time=(value:string)=>new Date(value).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'});
-function Badge({children,tone='neutral'}:{children:ReactNode;tone?:string}){return <span className={`badge ${tone}`}><span className="badge-dot"/>{children}</span>;}
-function IconBox({icon:Icon,tone='blue'}:{icon:LucideIcon;tone?:string}){return <span className={`icon-box ${tone}`}><Icon size={19}/></span>;}
-function Button({children,onClick,primary=false,disabled=false,className=''}:{children:ReactNode;onClick:()=>void;primary?:boolean;disabled?:boolean;className?:string}){return <button disabled={disabled} onClick={onClick} className={`button ${primary?'primary':''} ${className}`}>{children}</button>;}
-function Modal({title,children,onClose,drawer=false,dismissible=true}:{title:string;children:ReactNode;onClose:()=>void;drawer?:boolean;dismissible?:boolean}){
-  const ref=useRef<HTMLDivElement>(null);
-  useEffect(()=>{const previous=document.activeElement as HTMLElement;const node=ref.current;node?.focus();const before=document.body.style.overflow;document.body.style.overflow='hidden';function key(e:KeyboardEvent){if(e.key==='Escape'&&dismissible)onClose();if(e.key==='Tab'){const focusable=node?.querySelectorAll<HTMLElement>('button:not([disabled]),a,input,select,textarea,[tabindex="0"]');if(!focusable?.length){e.preventDefault();return;}const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===node)){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===node)){e.preventDefault();first.focus();}}}document.addEventListener('keydown',key);return()=>{document.body.style.overflow=before;document.removeEventListener('keydown',key);previous?.focus();};},[dismissible]);
-  return <div className={`overlay ${drawer?'drawer-overlay':''}`} onMouseDown={e=>{if(e.target===e.currentTarget&&dismissible)onClose();}}><div role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref} className={drawer?'drawer':'modal'}><div className="modal-title"><h2>{title}</h2>{dismissible&&<button className="icon-button" aria-label="Close dialog" onClick={onClose}><X size={20}/></button>}</div>{children}</div></div>;
+"use client";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  ChevronRight,
+  Circle,
+  CircleCheck,
+  Clock3,
+  Database,
+  FileCheck2,
+  FileJson,
+  FileText,
+  Fingerprint,
+  FlaskConical,
+  GitBranch,
+  History,
+  Layers3,
+  LockKeyhole,
+  MoreHorizontal,
+  Pill,
+  Plus,
+  RotateCcw,
+  ScanLine,
+  Search,
+  ShieldCheck,
+  ShieldX,
+  Sparkles,
+  Upload,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  bpRecords,
+  cardiacIds,
+  followupRecord,
+  lipidRecords,
+} from "@/lib/data";
+import type {
+  AccessEvent,
+  Category,
+  DemoState,
+  Finding,
+  HealthMemoryEntry,
+  HealthRecord,
+} from "@/lib/types";
+const navigation = [
+  { url: "/priors", label: "Priors", icon: Layers3 },
+  { url: "/brief", label: "Visit Brief", icon: Sparkles },
+  { url: "/agents", label: "Agents", icon: GitBranch },
+  { url: "/memory", label: "Memory", icon: Database },
+  { url: "/access", label: "Access", icon: Fingerprint },
+];
+const categories = [
+  "All",
+  "Imaging",
+  "Labs",
+  "Medications",
+  "Notes",
+  "Procedures",
+];
+const categoryIcons: Record<Category, LucideIcon> = {
+  Imaging: ScanLine,
+  Labs: FlaskConical,
+  Medications: Pill,
+  Notes: FileText,
+  Procedures: FileCheck2,
+};
+const date = (value: string) =>
+  new Date(
+    value.length === 10 ? value + "T12:00:00" : value,
+  ).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+const time = (value: string) =>
+  new Date(value).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+function Badge({
+  children,
+  tone = "neutral",
+}: {
+  children: ReactNode;
+  tone?: string;
+}) {
+  return (
+    <span className={`badge ${tone}`}>
+      <span className="badge-dot" />
+      {children}
+    </span>
+  );
 }
-function Empty({icon:Icon=BookOpen,title,children,action}:{icon?:LucideIcon;title:string;children:ReactNode;action?:ReactNode}){return <div className="empty"><Icon size={28}/><h3>{title}</h3><p>{children}</p>{action}</div>;}
-export default function HealthApp(){
-  const path=usePathname(),router=useRouter();
-  const [state,setState]=useState<DemoState|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[progress,setProgress]=useState<string[]>([]),[operation,setOperation]=useState(''),[menu,setMenu]=useState(false),[modal,setModal]=useState<'import'|'reset'|'connect'|null>(null),[resetGBrain,setResetGBrain]=useState(false),[record,setRecord]=useState<HealthRecord|null>(null),[evidence,setEvidence]=useState<Finding|null>(null),[event,setEvent]=useState<AccessEvent|null>(null),[toast,setToast]=useState('');
-  const [filter,setFilter]=useState('All'),[query,setQuery]=useState(''),[memoryTab,setMemoryTab]=useState('All');
-  useEffect(()=>{let valid=true;fetch('/api/demo').then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.error);if(valid)setState(data);}).catch(e=>{if(valid)setError(e.message);});return()=>{valid=false;};},[]);
-  useEffect(()=>{setMenu(false);setQuery('');setFilter('All');window.scrollTo(0,0);},[path]);
-  useEffect(()=>{if(!toast)return;const id=setTimeout(()=>setToast(''),6500);return()=>clearTimeout(id);},[toast]);
-  async function action(kind:string,extra:Record<string,unknown>={}){
-    if(busy)return;setBusy(true);setError('');setMenu(false);setModal(null);setProgress([]);setOperation(kind==='prepare'?'Preparing your health brief':kind==='import'?'Adding a piece of your story':'');
-    try{
-      const response=await fetch('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:kind,...extra})});
-      if(!response.ok){const result=await response.json();throw new Error(result.error||'Unable to complete this action.');}
-      if(response.headers.get('content-type')?.includes('ndjson')){
-        const reader=response.body!.getReader(),decoder=new TextDecoder();let buffer='';
-        while(true){const {value,done}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()??'';for(const line of lines){if(!line)continue;const item=JSON.parse(line);if(item.error)throw new Error(item.error);if(item.state)setState(item.state);if(item.label)setProgress(p=>[...p,item.label]);}}
-        if(kind==='prepare')router.push('/brief');if(kind==='import'){router.push('/memory');setToast('The follow-up report is now part of your priors.');}
-      }else{const result=await response.json();setState(result);if(kind==='fresh'){router.push('/priors');setToast('Fresh session started. Your records and GBrain memory are preserved.');}if(kind==='reset'){router.push('/priors');setToast(resetGBrain?'Demo records and demo memory reset.':'Local demo reset. GBrain memory was preserved.');}if(kind==='check'||kind==='sync')setToast(result.connection.connected?(kind==='sync'?'GBrain memory synchronized and verified.':'GBrain connection verified.'):result.connection.message);}
-    }catch(e){setError(e instanceof Error?e.message:'Something went wrong. Please try again.');}finally{setBusy(false);setOperation('');}
-  }
-  function viewEvidence(finding:Finding){if(finding.id==='cross-specialty-cardiovascular')router.push('/insights/cross-specialty-cardiovascular');else setEvidence(finding);}
-  const prepare=()=>void action('prepare');
-  const run=state?.run,findings=run?.status==='complete'?run.findings:[];
-  const imported=state?.records.some(r=>r.id===followupRecord.id)??false;
-  const connected=state?.connection.connected??false;
-  const currentNav=navigation.find(n=>path.startsWith(n.url));
-  const titles:Record<string,[string,string]>={'/priors':['Your Priors','All your priors. One intelligence.'],'/brief':['Your Health Brief','Prepared from your priors.'],'/agents':['How your brief was prepared','Specialized agents investigate. A reviewer verifies.'],'/memory':['What BiblioTech remembers','Durable, inspectable context powered by GBrain.'],'/access':['Your Data Access','See what accessed your data, why, and what happened.'],'/insights/cross-specialty-cardiovascular':['Why BiblioTech surfaced this','Follow the evidence. Understand the connection.']};
-  const [title,subtitle]=titles[path]??titles['/priors'];
-  const sourceButton=(id:string)=>{const found=state?.records.find(r=>r.id===id);return found?<button key={id} className="source-line" onClick={()=>{setEvidence(null);setRecord(found);}}><IconBox icon={categoryIcons[found.category]}/><span><strong>{found.title}</strong><small>{date(found.date)} · {found.resource.resourceType}</small><code>{id}</code></span><ArrowUpRight size={17}/></button>:<p key={id} className="error-banner">Finding withheld: source {id} is unavailable.</p>;};
-  return <div className="app-shell">
-    <aside className="sidebar"><Link href="/priors" className="brand"><span className="brand-symbol">B<span/></span><span>BiblioTech<small>HEALTH</small></span></Link><div className="nav-caption">YOUR HEALTH, CONNECTED</div><nav aria-label="Main navigation">{navigation.map(({url,label,icon:Icon})=><Link key={url} href={url} className={`nav-link ${path.startsWith(url)||(url==='/brief'&&path.startsWith('/insights'))?'active':''}`} aria-current={path===url?'page':undefined}><Icon size={19}/>{label}{url==='/brief'&&findings.length>0&&<span className="nav-count">{findings.length}</span>}</Link>)}</nav><div className="sidebar-bottom"><div className="sidebar-note"><ShieldCheck size={21}/><p>Your history.<br/><strong>Your understanding.</strong></p></div><span className="demo-indicator"><span/>Synthetic Demo</span><small>Evidence-grounded. Patient-owned.</small></div></aside>
-    <div className="workspace"><div className="topbar"><div className="breadcrumb"><span>Workspace</span><ChevronRight size={13}/><strong>{currentNav?.label??'Visit Brief'}</strong>{path.startsWith('/insights')&&<><ChevronRight size={13}/><span>Evidence</span></>}</div><div className="topbar-controls"><span className="synthetic-label"><FlaskConical size={13}/>Synthetic data</span><span className="topbar-divider"/><div className="demo-menu"><button className="text-button" onClick={()=>setMenu(!menu)} aria-expanded={menu}>Demo<ChevronDown size={14}/></button>{menu&&<><button className="menu-backdrop" onClick={()=>setMenu(false)} aria-label="Close demo menu"/><div className="dropdown"><button onClick={()=>{setMenu(false);setModal('reset');}}><RotateCcw size={15}/>Reset Demo</button><button onClick={()=>action('fresh')} disabled={busy}><Plus size={15}/>Start Fresh Session</button><button onClick={()=>{setMenu(false);setModal('import');}}><Upload size={15}/>Import Follow-Up Record</button><button onClick={()=>action('check')} disabled={busy}><Database size={15}/>Check GBrain Connection</button></div></>}</div></div></div>
-      <main id="main"><header className="page-header"><div><div className="eyebrow">{path==='/priors'?'THE BIGGER PICTURE':path==='/brief'?'PREPARED FOR YOUR NEXT CONVERSATION':path.startsWith('/insights')?'EVERY CONNECTION HAS A SOURCE':path==='/memory'?'CONTEXT THAT CARRIES FORWARD':path==='/agents'?'TRANSPARENT BY DESIGN':'PURPOSE. PERMISSION. PROOF.'}</div><h1>{title}</h1><p>{subtitle}</p></div><div className="header-actions">{path==='/priors'&&<><Button onClick={()=>setModal('import')} disabled={busy}><Upload size={16}/>Import Record</Button><Button onClick={prepare} primary disabled={busy||!state}><Sparkles size={16}/>Prepare My Visit<ArrowRight size={16}/></Button></>}{path==='/brief'&&<><Link className="button" href="/agents"><GitBranch size={16}/>View Agent Run</Link><Button onClick={prepare} disabled={busy||!state}><RotateCcw size={15}/>Refresh Brief</Button></>}{path==='/memory'&&<Button onClick={()=>setModal('import')} primary disabled={busy}><Plus size={16}/>Import New Record</Button>}{path.startsWith('/insights')&&<span className="principle"><ShieldCheck size={16}/>No evidence, no claim.</span>}</div></header>
-      <div className="patient-row"><div className="patient-context"><span className="initials">JT</span><span><strong>Jordan Taylor</strong><small>51 · Female · Synthetic Patient</small></span></div><span className="context-meta">{path==='/priors'?<><LockKeyhole size={13}/>Your longitudinal health record</>:path==='/memory'?<Badge tone={connected?'green':'neutral'}>GBrain {connected?'Connected':'Not Connected'}</Badge>:run?.status==='complete'?<><Clock3 size={13}/>{date(run.completedAt!)} · {run.reviewedIds.length} source records reviewed</>:<><FlaskConical size={13}/>Synthetic FHIR R4 demo</>}</span></div>
-      {error&&<div role="alert" className="error-banner"><ShieldX size={18}/><span>{error}</span><button className="text-button" onClick={()=>{setError('');if(!state)window.location.reload();}}>Dismiss / retry</button></div>}
-      {!state?<div className="loading-skeleton" aria-label="Loading synthetic health record"><div/><div/><div/></div>:<>
-      {path==='/priors'&&<>
-        <div className="stats-grid">{[{value:state.records.length,label:'Records',icon:Layers3,detail:'One connected history'},{value:'8 years',label:'History',icon:History,detail:'2018 — 2026'},{value:new Set(state.records.map(r=>r.specialty)).size,label:'Specialties',icon:GitBranch,detail:'A wider perspective'},{value:imported?2:3,label:'Items worth reviewing',icon:Sparkles,detail:'Questions, grounded in evidence'}].map(({value,label,icon:Icon,detail})=><div className="stat-card" key={label}><div className="stat-top"><span>{label}</span><Icon size={17}/></div><strong>{value}</strong><small>{detail}</small></div>)}</div>
-        <div className="priors-layout"><section className="card timeline-card"><div className="section-heading"><div><h2>Your longitudinal record</h2><p>Different moments. One continuous story.</p></div><span className="quiet-pill">{state.records.length} records</span></div><div className="timeline-toolbar"><div className="tabs" role="tablist" aria-label="Record types">{categories.map(c=><button key={c} role="tab" aria-selected={filter===c} className={filter===c?'selected':''} onClick={()=>setFilter(c)}>{c}</button>)}</div><label className="search-field"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search your medical history..." aria-label="Search your medical history"/>{query&&<button aria-label="Clear search" onClick={()=>setQuery('')}><X size={14}/></button>}</label></div><div className="timeline">{(()=>{const filtered=state.records.filter(r=>(filter==='All'||r.category===filter)&&`${r.title} ${r.summary} ${r.specialty} ${r.date}`.toLowerCase().includes(query.toLowerCase()));if(!filtered.length)return <Empty title="No matching records">Try another search or choose a different record type.</Empty>;return filtered.map((r,i)=><div key={r.id}>{(i===0||filtered[i-1].date.slice(0,4)!==r.date.slice(0,4))&&<div className="year-separator"><span>{r.date.slice(0,4)}</span><div/></div>}<button className="record-row" onClick={()=>setRecord(r)}><div className={`record-icon ${r.category.toLowerCase()}`}>{(()=>{const Icon=categoryIcons[r.category];return <Icon size={18}/>;})()}</div><div className="record-main"><div className="record-title"><strong>{r.title}</strong>{r.id===followupRecord.id&&<span className="tiny-tag green">Imported</span>}</div><p>{r.summary}</p><div className="record-meta"><span>{r.specialty}</span><span>·</span><span>{r.category}</span></div></div><div className="record-right"><time>{date(r.date)}</time><span>View <ArrowRight size={13}/></span></div></button></div>);})()}</div></section>
-        <aside className="priors-aside"><section className="prepare-card"><div className="orbit-illustration" aria-hidden="true"><span className="orbit-ring"/><span className="orbit-core"><Sparkles size={26}/></span><span className="orbit-dot one"><ScanLine size={17}/></span><span className="orbit-dot two"><FlaskConical size={17}/></span><span className="orbit-dot three"><Pill size={17}/></span></div><span className="eyebrow blue-text">GO INTO YOUR VISIT INFORMED</span><h2>A clearer picture.<br/>A better conversation.</h2><p>Bring your history together into a brief worth discussing with your care team.</p><Button onClick={prepare} primary disabled={busy}><Sparkles size={16}/>Prepare My Visit<ArrowRight size={15}/></Button><small>Built from your available evidence</small></section><section className="card aside-card"><div className="small-heading"><ShieldCheck size={17}/><h3>Clarity, with context</h3></div><p>Every finding links to its source. Uncertainty stays visible. You can inspect the whole picture.</p><div className="aside-rule"/><div className="small-heading"><Database size={16}/><span>Persistent memory</span></div><Badge tone={connected?'green':'neutral'}>GBrain {connected?'Connected':'Not Connected'}</Badge><Link href="/memory" className="inline-link">Explore your memory<ArrowRight size={14}/></Link></section><div className="synthetic-note"><FlaskConical size={15}/><p>All records are synthetic FHIR R4 demo data. No real patient information.</p></div></aside></div>
-      </>}
-      {path==='/brief'&&(run?.status==='complete'?<><div className="brief-hero"><div className="brief-hero-number">{findings.length}<span>things</span></div><div><h2>Worth discussing<br/>with your care team</h2><p>BiblioTech reviewed your available priors and surfaced questions<br className="desktop-break"/> that may be useful at your next appointment.</p></div><span className="hero-seal"><ShieldCheck size={29}/><small>EVIDENCE<br/>REVIEWED</small></span></div>{imported&&<div className="success-banner"><CircleCheck size={18}/><span>The breast-imaging follow-up is now matched. It no longer appears as an open question.</span><button className="inline-link" onClick={()=>setRecord(state.records.find(r=>r.id===followupRecord.id)!)}>View report<ArrowRight size={14}/></button></div>}<div className="brief-layout"><section className="finding-list">{findings.map((f,i)=><div key={f.id} className="finding-section"><div className="section-kicker"><span>0{i+1}</span>{f.id==='follow-up'?'FOLLOW-UPS':f.id==='medication'?'MEDICATION RECONCILIATION':'CROSS-SPECIALTY SIGNAL'}</div><article className={`card finding-card ${f.id==='cross-specialty-cardiovascular'?'featured-finding':''}`}><div className="finding-top"><IconBox icon={f.id==='follow-up'?ScanLine:f.id==='medication'?Pill:GitBranch} tone={f.id==='cross-specialty-cardiovascular'?'blue':'amber'}/><Badge tone={f.status==='inferred'?'blue':'amber'}>{f.status==='inferred'?'For clinician review':'Unresolved'}</Badge></div><h3>{f.title}</h3><p>{f.statement}</p><div className="finding-footer"><span className="evidence-count"><FileCheck2 size={14}/>{f.evidenceIds.length} source{f.evidenceIds.length===1?'':'s'}{f.id==='follow-up'?' · Mar 12, 2024':''}</span><button className="inline-link" onClick={()=>viewEvidence(f)}>View Evidence<ArrowRight size={15}/></button></div></article></div>)}</section><aside className="card questions"><div className="small-heading"><BookOpen size={18}/><h2>Questions for your doctor</h2></div><p className="muted">A starting point for your next conversation.</p><ol>{[...(!imported?['Was the recommended breast-imaging follow-up completed, and is the report available?']:[]),'Are the recent LDL and blood-pressure trends worth reviewing together with the imaging finding?','What atorvastatin dose should be considered current?','Are there additional records that should be added to my longitudinal history?'].map(q=><li key={q}>{q}</li>)}</ol><div className="questions-footer"><Sparkles size={17}/><p>Your next visit starts<br/>with a little more context.</p></div></aside></div><p className="page-disclaimer"><ShieldCheck size={15}/>BiblioTech surfaces questions and evidence for review. It does not provide medical diagnoses.</p></>:<section className="card"><Empty icon={Sparkles} title={run?.status==='failed'?'The previous run needs another try':'Your next conversation starts here'} action={<Button primary onClick={prepare} disabled={busy}>Prepare My Visit<ArrowRight size={16}/></Button>}>Prepare a fresh brief from your available records and inspectable memory.</Empty></section>)}
-      {path==='/insights/cross-specialty-cardiovascular'&&(()=>{const f=findings.find(f=>f.id==='cross-specialty-cardiovascular');return f?<><Link href="/brief" className="back-link"><ArrowLeft size={14}/>Back to your brief</Link><section className="card insight-finding"><div className="insight-heading"><IconBox icon={GitBranch}/><div><span className="eyebrow">CARDIOVASCULAR CONTEXT</span><h2>Potential cross-specialty signal</h2></div><Badge tone="blue">For clinician review</Badge></div><p>{f.statement}</p><div className="classification"><span>Classification <strong>Inferred</strong></span><span>Uncertainty <strong>Moderate</strong></span><span><FileCheck2 size={14}/><strong>{f.evidenceIds.length} linked sources</strong></span></div></section><section className="card evidence-map"><div className="section-heading"><div><h2>How the evidence connects</h2><p>Three perspectives, considered together. A question to review.</p></div><span className="quiet-pill"><GitBranch size={13}/>Evidence map</span></div><div className="evidence-nodes"><button className="evidence-node" onClick={()=>setRecord(state.records.find(r=>r.id===cardiacIds[0])!)}><span className="node-heading"><IconBox icon={ScanLine}/><strong>Breast Imaging</strong><ArrowUpRight size={15}/></span><span className="node-date">June 4, 2025</span><span className="imaging-observation">Breast arterial<br/>calcifications noted</span><span className="node-foot">Incidental observation · Otherwise benign</span></button><div className="evidence-node"><span className="node-heading"><IconBox icon={FlaskConical}/><strong>Lipid Trend</strong><span className="muted unit">LDL mg/dL</span></span><div className="lipid-bars">{lipidRecords.map(r=><button key={r.id} onClick={()=>setRecord(state.records.find(x=>x.id===r.id)!)} aria-label={`Open ${r.date.slice(0,4)} lipid result`}><strong>{r.resource.valueQuantity!.value}</strong><span style={{height:`${(r.resource.valueQuantity!.value-90)*1.05}px`}}/><small>{r.date.slice(0,4)}</small></button>)}</div><span className="node-foot">5 results · 2021–2025</span></div><div className="evidence-node"><span className="node-heading"><IconBox icon={History}/><strong>Blood Pressure</strong><span className="muted unit">mmHg</span></span><div className="bp-values">{bpRecords.map(r=><button key={r.id} onClick={()=>setRecord(state.records.find(x=>x.id===r.id)!)}><span>{r.date.slice(0,4)}</span><strong>{r.resource.component![0].valueQuantity.value}<small> / {r.resource.component![1].valueQuantity.value}</small></strong><span className="bp-track"><i style={{width:`${r.resource.component![0].valueQuantity.value-80}%`}}/></span></button>)}</div><span className="node-foot">4 measurements · 2022–2025</span></div></div><div className="graph-connectors" aria-hidden="true"><svg viewBox="0 0 900 62" preserveAspectRatio="none"><path d="M150 0 V22 Q150 32 160 32 H440 Q450 32 450 42 V62 M450 0 V62 M750 0 V22 Q750 32 740 32 H460 Q450 32 450 42" fill="none" stroke="#b7c8eb" strokeWidth="1.5"/><circle cx="150" cy="2" r="3" fill="#4169e1"/><circle cx="450" cy="2" r="3" fill="#4169e1"/><circle cx="750" cy="2" r="3" fill="#4169e1"/></svg></div><div className="conclusion-node"><GitBranch size={19}/><div><strong>Potential cardiovascular context</strong><span>A connection for clinician review, with uncertainty preserved.</span></div><Badge tone="blue">Inferred</Badge></div></section><div className="evidence-bottom"><section className="card sources"><div className="section-heading"><div><h2>Source records</h2><p>Open the exact evidence behind this connection.</p></div><span className="quiet-pill">{f.evidenceIds.length}</span></div>{f.evidenceIds.map(sourceButton)}</section><aside className="card reviewer-card"><IconBox icon={ShieldCheck} tone="green"/><h3>Reviewer Agent</h3><Badge tone="green">Evidence check passed</Badge><ul>{f.reviewer.reasons.map(reason=><li key={reason}><Check size={15}/>{reason}</li>)}</ul><Link href="/agents" className="inline-link">View the full agent run<ArrowRight size={14}/></Link></aside></div></>:<section className="card"><Empty icon={ShieldCheck} title="Finding withheld" action={<Button primary onClick={prepare}>Prepare My Visit</Button>}>No current, reviewed finding is available. Prepare your brief to retrieve the supporting evidence.</Empty></section>;})()}
-      {path==='/agents'&&(run?<><div className="run-summary card"><div><span className="eyebrow">WORKFLOW RUN</span><h3>{run.id}</h3><Badge tone={run.status==='complete'?'green':run.status==='failed'?'red':'blue'}>{run.status==='complete'?'Completed':run.status}</Badge></div><div><small>Started</small><strong>{time(run.startedAt)}</strong></div><div><small>Completed</small><strong>{run.completedAt?time(run.completedAt):'—'}</strong></div><div><small>Duration</small><strong>{run.completedAt?`${((Date.parse(run.completedAt)-Date.parse(run.startedAt))/1000).toFixed(2)} sec`:'In progress'}</strong></div></div><div className="run-metrics">{[[run.reviewedIds.length,'records reviewed'],[run.findings.length+run.rejected.length,'candidate findings'],[run.findings.length,'evidence-supported'],[run.rejected.length,'rejected']].map(([value,label])=><div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div><div className="agents-layout"><section><div className="section-heading flush"><div><h2>From history to understanding</h2><p>Actual execution of the demo’s deterministic workflow.</p></div><span className="quiet-pill">5 specialized agents</span></div><div className="pipeline">{run.steps.map((step,i)=><div className="pipeline-item" key={step.name}><span className="pipeline-index">0{i+1}</span><article className="card agent-card"><div className="agent-card-heading"><h3>{step.name}</h3><Badge tone={step.status==='complete'?'green':step.status==='failed'?'red':'neutral'}>{step.status==='complete'?'Complete':step.status}</Badge></div><p>{step.activity}</p><div className="scope-chips"><LockKeyhole size={12}/>{step.scopes.map(s=><span key={s}>{s}</span>)}</div></article></div>)}</div></section><aside><section className="card rejected-card"><div className="small-heading"><ShieldX size={19}/><h2>Knowing what to withhold</h2></div><p className="muted">Evidence sets the boundary.</p>{run.rejected.map(f=><article className="rejection" key={f.id}><span className="rejected-label">REJECTED</span><blockquote>“{f.statement}”</blockquote><p>{f.reviewer.reasons.join(' ')}</p></article>)}{!run.rejected.length&&<p>No candidates rejected in this run.</p>}<div className="review-note"><ShieldCheck size={16}/><span>Checked by deterministic evidence and language rules.</span></div></section><Link href="/access" className="card access-shortcut"><Fingerprint size={22}/><span><strong>Purpose-limited access</strong><small>Inspect this run’s access ledger</small></span><ArrowUpRight size={17}/></Link></aside></div></>:<section className="card"><Empty icon={GitBranch} title="No active agent run" action={<Button onClick={prepare} primary disabled={busy}>Prepare My Visit</Button>}>Prepare your visit brief to see actual agent activity, review decisions, and timing.</Empty></section>)}
-      {path==='/memory'&&<>
-        {!connected&&<div className="connection-banner"><span className="connection-icon"><Database size={23}/></span><div><h3>GBrain isn’t connected.</h3><p>The health record remains available, but persistent memory is unavailable.</p><small>{state.connection.message}</small></div><Button onClick={()=>setModal('connect')}>Connect GBrain<ArrowUpRight size={15}/></Button></div>}
-        <div className="memory-toolbar"><div className="tabs" role="tablist" aria-label="Memory categories">{['All','Open Follow-Ups','Reviewed Findings','Medications','Preferences','Resolved'].map(t=><button role="tab" aria-selected={memoryTab===t} key={t} className={memoryTab===t?'selected':''} onClick={()=>setMemoryTab(t)}>{t}</button>)}</div><Button onClick={()=>action('sync')} disabled={busy||!connected}><RotateCcw size={14}/>Sync Memory</Button></div>
-        <div className="memory-layout"><section>{connected?(()=>{const shown=state.memory.filter(m=>memoryTab==='All'||(memoryTab==='Open Follow-Ups'&&m.category==='follow_up')||(memoryTab==='Reviewed Findings'&&m.category==='finding')||(memoryTab==='Medications'&&m.category==='medication')||(memoryTab==='Preferences'&&m.category==='preference')||(memoryTab==='Resolved'&&m.status==='resolved'));return shown.length?shown.map(m=><MemoryCard key={m.id} entry={m} state={state} openSource={setRecord}/>):<div className="card"><Empty icon={Database} title={memoryTab==='All'?'No demo memory saved yet':'No memory in this category'} action={memoryTab==='All'?<Button onClick={prepare} primary>Prepare My Visit</Button>:undefined}>Memory shown here is read directly from your configured GBrain workspace.</Empty></div>;})():<div className="card"><Empty icon={Database} title="A place for context that lasts" action={<Button onClick={()=>setModal('connect')}>Set up persistent memory<ArrowRight size={15}/></Button>}>Connect your synthetic-demo GBrain workspace to inspect remembered findings, source evidence, and resolved questions.</Empty></div>}
-        {imported&&<div className="card local-resolution"><div className="small-heading"><CircleCheck size={21}/><h3>Follow-up matched in your records</h3><Badge tone="green">Matched</Badge></div><p>The September 18, 2024 imaging report is now linked to the March recommendation. Your next brief will use this evidence.</p><p className="muted">{connected?'Persistent memory was read from GBrain above.':"This is local record reconciliation. It does not confirm a GBrain memory update."}</p><button className="inline-link" onClick={()=>setRecord(state.records.find(r=>r.id===followupRecord.id)!)}>View imported evidence<ArrowRight size={14}/></button></div>}</section><aside><section className="card memory-explainer"><span className="eyebrow">THE NEXT PIECE OF THE STORY</span><IconBox icon={FileCheck2}/><h2>New evidence.<br/>Updated understanding.</h2><p>Add the follow-up report to connect a recommendation with its outcome.</p><div className="resolution-path"><Badge tone="amber">Unresolved</Badge><ArrowDown size={18}/><Badge tone="green">Resolved</Badge></div><Button onClick={()=>setModal('import')} disabled={busy||imported}><Upload size={15}/>{imported?'Follow-up record imported':'Import Follow-Up Record'}</Button><small>{imported?'The source record is available in your priors.':'Synthetic report · September 18, 2024'}</small></section><section className="card session-card"><div className="small-heading"><History size={19}/><h3>Start with a fresh session</h3></div><p>Clear the current brief. Your records and GBrain memory stay with you.</p><Button onClick={()=>action('fresh')} disabled={busy}>Start Fresh Session<ArrowRight size={15}/></Button></section></aside></div>
-      </>}
-      {path==='/access'&&<><section className="access-principle"><span className="principle-icon"><Fingerprint size={38}/></span><div><span className="eyebrow">YOU STAY IN CONTROL</span><h2>Agents get access for a purpose,<br/>not permanent keys to your health.</h2></div><ShieldCheck size={30}/></section>{(()=>{const latest=[...state.ledger].reverse().find(e=>e.actor==='Cross-Specialty Agent'&&e.result==='Allowed');return latest?<section className="card access-request"><div className="section-heading"><div className="small-heading"><IconBox icon={GitBranch}/><div><span className="eyebrow">LATEST CROSS-SPECIALTY REQUEST</span><h3>Cross-Specialty Agent</h3></div></div><Badge tone="green">Access granted</Badge></div><div className="access-details"><div><small>Purpose</small><strong>Prepare visit brief</strong></div><div><small>Requested resources</small><strong>{latest.scopes.join(' · ')}</strong></div><div><small>Access mode</small><strong><LockKeyhole size={13}/>Read only</strong></div><div><small>Duration</small><strong>This run only</strong></div></div><div className="request-run"><span>Run</span><code>{latest.runId}</code><span>Grant expired when the run completed</span></div></section>:null;})()}<section className="card ledger-card"><div className="section-heading"><div><h2>Access ledger</h2><p>Every request. Every decision. An inspectable record.</p></div><span className="quiet-pill">{state.ledger.length} events</span></div>{state.ledger.length?<div className="table-scroll"><table><thead><tr><th>TIME</th><th>ACTOR</th><th>DATA</th><th>PURPOSE</th><th>RESULT</th><th><span className="sr-only">Details</span></th></tr></thead><tbody>{[...state.ledger].reverse().map(e=><tr key={e.id} className={e.result==='Denied'?'denied-row':''}><td><time>{time(e.timestamp)}</time></td><td><button className="actor-button" onClick={()=>setEvent(e)}>{e.result==='Denied'?<ShieldX size={15}/>:<GitBranch size={15}/>}<strong>{e.actor}</strong></button></td><td>{e.scopes.join(' + ')}</td><td>{e.purpose}</td><td><Badge tone={e.result==='Denied'?'red':'green'}>{e.result}</Badge></td><td><button className="icon-button" aria-label={`Open ${e.actor} access event`} onClick={()=>setEvent(e)}><ArrowUpRight size={16}/></button></td></tr>)}</tbody></table></div>:<Empty icon={Fingerprint} title="No access events yet" action={<Button onClick={prepare} primary>Prepare My Visit</Button>}>Run the workflow to see enforced permissions and a denied research request.</Empty>}</section><div className="ledger-footnote"><ShieldCheck size={16}/><p>The demo includes an intentional research-scope probe. Its denied request returns no patient records. No external research call is made.</p></div></>}
-      </>}
-      <footer className="app-footer"><span>BiblioTech Health</span><span><span className="footer-dot"/>All records synthetic · Built around evidence</span></footer>
-      </main>
+function IconBox({
+  icon: Icon,
+  tone = "blue",
+}: {
+  icon: LucideIcon;
+  tone?: string;
+}) {
+  return (
+    <span className={`icon-box ${tone}`}>
+      <Icon size={19} />
+    </span>
+  );
+}
+function Button({
+  children,
+  onClick,
+  primary = false,
+  disabled = false,
+  className = "",
+}: {
+  children: ReactNode;
+  onClick: () => void;
+  primary?: boolean;
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`button ${primary ? "primary" : ""} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+function Modal({
+  title,
+  children,
+  onClose,
+  drawer = false,
+  dismissible = true,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+  drawer?: boolean;
+  dismissible?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement;
+    const node = ref.current;
+    node?.focus();
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function key(e: KeyboardEvent) {
+      if (e.key === "Escape" && dismissible) onClose();
+      if (e.key === "Tab") {
+        const focusable = node?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]),a,input,select,textarea,[tabindex="0"]',
+        );
+        if (!focusable?.length) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusable[0],
+          last = focusable[focusable.length - 1];
+        if (
+          e.shiftKey &&
+          (document.activeElement === first || document.activeElement === node)
+        ) {
+          e.preventDefault();
+          last.focus();
+        } else if (
+          !e.shiftKey &&
+          (document.activeElement === last || document.activeElement === node)
+        ) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    document.addEventListener("keydown", key);
+    return () => {
+      document.body.style.overflow = before;
+      document.removeEventListener("keydown", key);
+      previous?.focus();
+    };
+  }, [dismissible]);
+  return (
+    <div
+      className={`overlay ${drawer ? "drawer-overlay" : ""}`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && dismissible) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        ref={ref}
+        className={drawer ? "drawer" : "modal"}
+      >
+        <div className="modal-title">
+          <h2>{title}</h2>
+          {dismissible && (
+            <button
+              className="icon-button"
+              aria-label="Close dialog"
+              onClick={onClose}
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        {children}
+      </div>
     </div>
-    {toast&&<div className="toast" role="status"><CircleCheck size={18}/>{toast}<button className="icon-button" aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={15}/></button></div>}
-    {busy&&operation&&<Modal title={operation} dismissible={false} onClose={()=>{}}><div className="progress-emblem"><Sparkles size={27}/></div><p className="modal-description">Connecting your records, checking the evidence, and preserving the context.</p><div className="progress-list" aria-live="polite">{progress.map((label,i)=><div key={`${i}-${label}`}><Check size={16}/><span>{label}</span></div>)}<div className="progress-active"><span className="progress-dot"/>Working with your available records…</div></div></Modal>}
-    {modal==='import'&&<Modal title="Import synthetic FHIR record" onClose={()=>setModal(null)}><p className="modal-description">One new report can answer an open question.</p><div className="file-preview"><FileJson size={26}/><div><strong>followup-mammogram-2024-09.json</strong><small>FHIR R4 · DiagnosticReport · Synthetic data</small></div><Badge tone="blue">Ready</Badge></div><div className="import-preview"><span className="eyebrow">SEPTEMBER 18, 2024</span><h3>Diagnostic Mammogram</h3><p>Stable appearance compared with prior examination.</p><div><Check size={16}/>Return to routine annual screening.</div></div><div className="import-link"><GitBranch size={16}/><span>Matches the March 12, 2024 follow-up recommendation.</span></div>{!connected&&<p className="import-notice">GBrain is disconnected. The record can be imported locally; persistent memory will remain unavailable until connected.</p>}<div className="modal-actions"><a className="text-button" href="/fixtures/followup-mammogram-2024-09.json" download>Download fixture<ArrowDown size={14}/></a><Button primary disabled={busy||imported} onClick={()=>action('import',{record:followupRecord.resource})}>{imported?'Already imported':'Import Record'}<ArrowRight size={16}/></Button></div></Modal>}
-    {modal==='reset'&&<Modal title="Reset the synthetic demo" onClose={()=>setModal(null)}><p className="modal-description">Restore the original 25 records and clear local briefs and access events.</p><label className="checkbox-label"><input type="checkbox" checked={resetGBrain} onChange={e=>setResetGBrain(e.target.checked)}/>Also reset GBrain demo memory?</label><p className="muted">Default: No. Preserved GBrain memory is recalled on the next session or brief. Checking this removes only snapshots in this demo’s configured namespace.</p><div className="modal-actions"><Button onClick={()=>setModal(null)}>Cancel</Button><Button primary disabled={busy} onClick={()=>action('reset',{resetGBrain})}>Reset Demo</Button></div></Modal>}
-    {modal==='connect'&&<Modal title="Connect GBrain memory" onClose={()=>setModal(null)}><p className="modal-description">Use a dedicated workspace containing synthetic demo data only.</p><ol className="setup-steps"><li>In GBrain, create a client and add the demo workspace’s Memory application with Full permission.</li><li>Add a connection. Store its token as <code>GBRAIN_TOKEN</code> in this app’s server-only <code>.env.local</code>.</li><li>Restart the app, then check the connection. Prepare a brief or sync memory to save and verify the demo entries.</li></ol><p className="muted">Tokens stay on the server. The app confirms writes with a separate memory read.</p><div className="modal-actions"><a href="https://gbrain.io/docs/workspace/memory-anywhere" target="_blank" rel="noreferrer" className="inline-link">GBrain setup guide<ArrowUpRight size={15}/></a><Button primary onClick={()=>action('check')}>Check Connection</Button></div></Modal>}
-    {record&&<Modal title="Source record" drawer onClose={()=>setRecord(null)}><div className="drawer-record-header"><IconBox icon={categoryIcons[record.category]}/><Badge tone="neutral">Synthetic FHIR R4</Badge></div><span className="eyebrow">{record.specialty.toUpperCase()}</span><h2 className="drawer-title">{record.title}</h2><p className="muted">{date(record.date)} · {record.resource.resourceType}</p><div className="source-observation"><span className="eyebrow">RECORDED EVIDENCE</span><p>{record.summary}</p></div><dl className="detail-list"><div><dt>Source ID</dt><dd><code>{record.id}</code></dd></div><div><dt>Record type</dt><dd>{record.resource.resourceType}</dd></div><div><dt>Provenance</dt><dd>Coherent synthetic demo fixture</dd></div></dl><details className="fhir-details"><summary><FileJson size={16}/>Inspect FHIR resource<ChevronDown size={16}/></summary><pre>{JSON.stringify(record.resource,null,2)}</pre></details><p className="drawer-note"><ShieldCheck size={16}/>Source evidence is preserved as recorded. An inference is never substituted for the original record.</p></Modal>}
-    {evidence&&<Modal title="Evidence behind the finding" drawer onClose={()=>setEvidence(null)}><Badge tone={evidence.status==='inferred'?'blue':'amber'}>{evidence.status==='inferred'?'For clinician review':'Unresolved'}</Badge><h2 className="drawer-title">{evidence.title}</h2><p className="drawer-statement">{evidence.statement}</p><h3>Source records</h3>{evidence.evidenceIds.map(sourceButton)}<p className="drawer-note"><ShieldCheck size={16}/>Reviewed against source evidence. Uncertainty preserved.</p></Modal>}
-    {event&&<Modal title="Access Event" drawer onClose={()=>setEvent(null)}><IconBox icon={event.result==='Denied'?ShieldX:ShieldCheck} tone={event.result==='Denied'?'red':'green'}/><h2 className="drawer-title">{event.actor}</h2><Badge tone={event.result==='Denied'?'red':'green'}>{event.result==='Denied'?'DENIED':'ALLOWED'}</Badge><dl className="detail-list"><div><dt>Requested</dt><dd>{event.scopes.join(' + ')}</dd></div><div><dt>Purpose</dt><dd>{event.purpose}</dd></div><div><dt>Policy</dt><dd>{event.actor==='Research Agent'?'Research agents may access de-identified metadata only.':'Access is read-only, purpose-scoped, and valid only within the active run.'}</dd></div><div><dt>Reason</dt><dd>{event.reason}</dd></div><div><dt>Records returned</dt><dd>{event.recordIds.length}</dd></div><div><dt>Timestamp</dt><dd>{date(event.timestamp)} · {time(event.timestamp)}</dd></div><div><dt>Run ID</dt><dd><code>{event.runId}</code></dd></div></dl></Modal>}
-  </div>;
+  );
 }
-function MemoryCard({entry:m,state,openSource}:{entry:HealthMemoryEntry;state:DemoState;openSource:(r:HealthRecord)=>void}){
-  return <article className={`card memory-card ${m.status==='resolved'?'resolved-memory':''}`}><div className="memory-card-top"><span className="eyebrow">{m.category.replaceAll('_',' ').toUpperCase()}</span><Badge tone={m.status==='resolved'?'green':m.status==='reviewed'?'blue':'amber'}>{m.status==='resolved'?'Resolved':m.status==='reviewed'?'For clinician review':'Unresolved'}</Badge></div><h3>{m.title}</h3><p>{m.statement}</p><div className="memory-metadata"><div><small>Created</small><span>{date(m.createdAt)}</span></div><div><small>Updated</small><span>{date(m.updatedAt)} · {time(m.updatedAt)}</span></div><div><small>Memory ID</small><code>{m.remoteId||m.id}</code></div></div>{m.resolvedByEvidenceId&&<div className="resolved-by"><CheckCheck size={16}/><span>Resolved by <code>DiagnosticReport/{m.resolvedByEvidenceId}</code></span></div>}<div className="memory-sources">{m.evidenceIds.map(id=>{const record=state.records.find(r=>r.id===id);return record?<button key={id} className="evidence-chip" onClick={()=>openSource(record)}><FileCheck2 size={12}/>{id}<ArrowUpRight size={12}/></button>:null;})}</div><div className="finding-footer"><span className="evidence-count"><Database size={13}/>Read from GBrain</span>{state.connection.workspaceUrl&&<a className="inline-link" href={state.connection.workspaceUrl} target="_blank" rel="noreferrer">Open in GBrain<ArrowUpRight size={14}/></a>}</div></article>;
+function Empty({
+  icon: Icon = BookOpen,
+  title,
+  children,
+  action,
+}: {
+  icon?: LucideIcon;
+  title: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="empty">
+      <Icon size={28} />
+      <h3>{title}</h3>
+      <p>{children}</p>
+      {action}
+    </div>
+  );
+}
+export default function HealthApp() {
+  const path = usePathname(),
+    router = useRouter();
+  const [state, setState] = useState<DemoState | null>(null),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false),
+    [progress, setProgress] = useState<string[]>([]),
+    [operation, setOperation] = useState(""),
+    [menu, setMenu] = useState(false),
+    [modal, setModal] = useState<"import" | "reset" | "connect" | null>(null),
+    [resetGBrain, setResetGBrain] = useState(false),
+    [record, setRecord] = useState<HealthRecord | null>(null),
+    [evidence, setEvidence] = useState<Finding | null>(null),
+    [event, setEvent] = useState<AccessEvent | null>(null),
+    [toast, setToast] = useState("");
+  const [filter, setFilter] = useState("All"),
+    [query, setQuery] = useState(""),
+    [memoryTab, setMemoryTab] = useState("All");
+  useEffect(() => {
+    let valid = true;
+    fetch("/api/demo")
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        if (valid) setState(data);
+      })
+      .catch((e) => {
+        if (valid) setError(e.message);
+      });
+    return () => {
+      valid = false;
+    };
+  }, []);
+  useEffect(() => {
+    setMenu(false);
+    setQuery("");
+    setFilter("All");
+    window.scrollTo(0, 0);
+  }, [path]);
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(""), 6500);
+    return () => clearTimeout(id);
+  }, [toast]);
+  async function action(kind: string, extra: Record<string, unknown> = {}) {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setMenu(false);
+    setModal(null);
+    setProgress([]);
+    setOperation(
+      kind === "prepare"
+        ? "Preparing your health brief"
+        : kind === "import"
+          ? "Adding a piece of your story"
+          : "",
+    );
+    try {
+      const response = await fetch("/api/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: kind, ...extra }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Unable to complete this action.");
+      }
+      if (response.headers.get("content-type")?.includes("ndjson")) {
+        const reader = response.body!.getReader(),
+          decoder = new TextDecoder();
+        let buffer = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            if (!line) continue;
+            const item = JSON.parse(line);
+            if (item.error) throw new Error(item.error);
+            if (item.state) setState(item.state);
+            if (item.label) setProgress((p) => [...p, item.label]);
+          }
+        }
+        if (kind === "prepare") router.push("/brief");
+        if (kind === "import") {
+          router.push("/memory");
+          setToast("The follow-up report is now part of your priors.");
+        }
+      } else {
+        const result = await response.json();
+        setState(result);
+        if (kind === "fresh") {
+          router.push("/priors");
+          setToast(
+            "Fresh session started. Your records and GBrain memory are preserved.",
+          );
+        }
+        if (kind === "reset") {
+          router.push("/priors");
+          setToast(
+            resetGBrain
+              ? "Demo records and demo memory reset."
+              : "Local demo reset. GBrain memory was preserved.",
+          );
+        }
+        if (kind === "check" || kind === "sync")
+          setToast(
+            result.connection.connected
+              ? kind === "sync"
+                ? "GBrain memory synchronized and verified."
+                : "GBrain connection verified."
+              : result.connection.message,
+          );
+      }
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setBusy(false);
+      setOperation("");
+    }
+  }
+  function viewEvidence(finding: Finding) {
+    if (finding.id === "cross-specialty-cardiovascular")
+      router.push("/insights/cross-specialty-cardiovascular");
+    else setEvidence(finding);
+  }
+  const prepare = () => void action("prepare");
+  const run = state?.run,
+    findings = run?.status === "complete" ? run.findings : [];
+  const imported =
+    state?.records.some((r) => r.id === followupRecord.id) ?? false;
+  const connected = state?.connection.connected ?? false;
+  const currentNav = navigation.find((n) => path.startsWith(n.url));
+  const titles: Record<string, [string, string]> = {
+    "/priors": ["Your Priors", "All your priors. One intelligence."],
+    "/brief": ["Your Health Brief", "Prepared from your priors."],
+    "/agents": [
+      "How your brief was prepared",
+      "Specialized agents investigate. A reviewer verifies.",
+    ],
+    "/memory": [
+      "What BiblioTech remembers",
+      "Durable, inspectable context powered by GBrain.",
+    ],
+    "/access": [
+      "Your Data Access",
+      "See what accessed your data, why, and what happened.",
+    ],
+    "/insights/cross-specialty-cardiovascular": [
+      "Why BiblioTech surfaced this",
+      "Follow the evidence. Understand the connection.",
+    ],
+  };
+  const [title, subtitle] = titles[path] ?? titles["/priors"];
+  const sourceButton = (id: string) => {
+    const found = state?.records.find((r) => r.id === id);
+    return found ? (
+      <button
+        key={id}
+        className="source-line"
+        onClick={() => {
+          setEvidence(null);
+          setRecord(found);
+        }}
+      >
+        <IconBox icon={categoryIcons[found.category]} />
+        <span>
+          <strong>{found.title}</strong>
+          <small>
+            {date(found.date)} · {found.resource.resourceType}
+          </small>
+          <code>{id}</code>
+        </span>
+        <ArrowUpRight size={17} />
+      </button>
+    ) : (
+      <p key={id} className="error-banner">
+        Finding withheld: source {id} is unavailable.
+      </p>
+    );
+  };
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <Link href="/priors" className="brand">
+          <span className="brand-symbol">
+            B<span />
+          </span>
+          <span>
+            BiblioTech<small>HEALTH</small>
+          </span>
+        </Link>
+        <div className="nav-caption">YOUR HEALTH, CONNECTED</div>
+        <nav aria-label="Main navigation">
+          {navigation.map(({ url, label, icon: Icon }) => (
+            <Link
+              key={url}
+              href={url}
+              className={`nav-link ${path.startsWith(url) || (url === "/brief" && path.startsWith("/insights")) ? "active" : ""}`}
+              aria-current={path === url ? "page" : undefined}
+            >
+              <Icon size={19} />
+              {label}
+              {url === "/brief" && findings.length > 0 && (
+                <span className="nav-count">{findings.length}</span>
+              )}
+            </Link>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="sidebar-note">
+            <ShieldCheck size={21} />
+            <p>
+              Your history.
+              <br />
+              <strong>Your understanding.</strong>
+            </p>
+          </div>
+          <span className="demo-indicator">
+            <span />
+            Synthetic Demo
+          </span>
+          <small>Evidence-grounded. Patient-owned.</small>
+        </div>
+      </aside>
+      <div className="workspace">
+        <div className="topbar">
+          <div className="breadcrumb">
+            <span>Workspace</span>
+            <ChevronRight size={13} />
+            <strong>{currentNav?.label ?? "Visit Brief"}</strong>
+            {path.startsWith("/insights") && (
+              <>
+                <ChevronRight size={13} />
+                <span>Evidence</span>
+              </>
+            )}
+          </div>
+          <div className="topbar-controls">
+            <span className="synthetic-label">
+              <FlaskConical size={13} />
+              Synthetic data
+            </span>
+            <span className="topbar-divider" />
+            <div className="demo-menu">
+              <button
+                className="text-button"
+                onClick={() => setMenu(!menu)}
+                aria-expanded={menu}
+              >
+                Demo
+                <ChevronDown size={14} />
+              </button>
+              {menu && (
+                <>
+                  <button
+                    className="menu-backdrop"
+                    onClick={() => setMenu(false)}
+                    aria-label="Close demo menu"
+                  />
+                  <div className="dropdown">
+                    <button
+                      onClick={() => {
+                        setMenu(false);
+                        setModal("reset");
+                      }}
+                    >
+                      <RotateCcw size={15} />
+                      Reset Demo
+                    </button>
+                    <button onClick={() => action("fresh")} disabled={busy}>
+                      <Plus size={15} />
+                      Start Fresh Session
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMenu(false);
+                        setModal("import");
+                      }}
+                    >
+                      <Upload size={15} />
+                      Import Follow-Up Record
+                    </button>
+                    <button onClick={() => action("check")} disabled={busy}>
+                      <Database size={15} />
+                      Check GBrain Connection
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <main id="main">
+          <header className="page-header">
+            <div>
+              <div className="eyebrow">
+                {path === "/priors"
+                  ? "THE BIGGER PICTURE"
+                  : path === "/brief"
+                    ? "PREPARED FOR YOUR NEXT CONVERSATION"
+                    : path.startsWith("/insights")
+                      ? "EVERY CONNECTION HAS A SOURCE"
+                      : path === "/memory"
+                        ? "CONTEXT THAT CARRIES FORWARD"
+                        : path === "/agents"
+                          ? "TRANSPARENT BY DESIGN"
+                          : "PURPOSE. PERMISSION. PROOF."}
+              </div>
+              <h1>{title}</h1>
+              <p>{subtitle}</p>
+            </div>
+            <div className="header-actions">
+              {path === "/priors" && (
+                <>
+                  <Button onClick={() => setModal("import")} disabled={busy}>
+                    <Upload size={16} />
+                    Import Record
+                  </Button>
+                  <Button onClick={prepare} primary disabled={busy || !state}>
+                    <Sparkles size={16} />
+                    Prepare My Visit
+                    <ArrowRight size={16} />
+                  </Button>
+                </>
+              )}
+              {path === "/brief" && (
+                <>
+                  <Link className="button" href="/agents">
+                    <GitBranch size={16} />
+                    View Agent Run
+                  </Link>
+                  <Button onClick={prepare} disabled={busy || !state}>
+                    <RotateCcw size={15} />
+                    Refresh Brief
+                  </Button>
+                </>
+              )}
+              {path === "/memory" && (
+                <Button
+                  onClick={() => setModal("import")}
+                  primary
+                  disabled={busy}
+                >
+                  <Plus size={16} />
+                  Import New Record
+                </Button>
+              )}
+              {path.startsWith("/insights") && (
+                <span className="principle">
+                  <ShieldCheck size={16} />
+                  No evidence, no claim.
+                </span>
+              )}
+            </div>
+          </header>
+          <div className="patient-row">
+            <div className="patient-context">
+              <span className="initials">JT</span>
+              <span>
+                <strong>Jordan Taylor</strong>
+                <small>51 · Female · Synthetic Patient</small>
+              </span>
+            </div>
+            <span className="context-meta">
+              {path === "/priors" ? (
+                <>
+                  <LockKeyhole size={13} />
+                  Your longitudinal health record
+                </>
+              ) : path === "/memory" ? (
+                <Badge tone={connected ? "green" : "neutral"}>
+                  GBrain {connected ? "Connected" : "Not Connected"}
+                </Badge>
+              ) : run?.status === "complete" ? (
+                <>
+                  <Clock3 size={13} />
+                  {date(run.completedAt!)} · {run.reviewedIds.length} source
+                  records reviewed
+                </>
+              ) : (
+                <>
+                  <FlaskConical size={13} />
+                  Synthetic FHIR R4 demo
+                </>
+              )}
+            </span>
+          </div>
+          {error && (
+            <div role="alert" className="error-banner">
+              <ShieldX size={18} />
+              <span>{error}</span>
+              <button
+                className="text-button"
+                onClick={() => {
+                  setError("");
+                  if (!state) window.location.reload();
+                }}
+              >
+                Dismiss / retry
+              </button>
+            </div>
+          )}
+          {!state ? (
+            <div
+              className="loading-skeleton"
+              aria-label="Loading synthetic health record"
+            >
+              <div />
+              <div />
+              <div />
+            </div>
+          ) : (
+            <>
+              {path === "/priors" && (
+                <>
+                  <div className="stats-grid">
+                    {[
+                      {
+                        value: state.records.length,
+                        label: "Records",
+                        icon: Layers3,
+                        detail: "One connected history",
+                      },
+                      {
+                        value: "8 years",
+                        label: "History",
+                        icon: History,
+                        detail: "2018 — 2026",
+                      },
+                      {
+                        value: new Set(state.records.map((r) => r.specialty))
+                          .size,
+                        label: "Specialties",
+                        icon: GitBranch,
+                        detail: "A wider perspective",
+                      },
+                      {
+                        value: imported ? 2 : 3,
+                        label: "Items worth reviewing",
+                        icon: Sparkles,
+                        detail: "Questions, grounded in evidence",
+                      },
+                    ].map(({ value, label, icon: Icon, detail }) => (
+                      <div className="stat-card" key={label}>
+                        <div className="stat-top">
+                          <span>{label}</span>
+                          <Icon size={17} />
+                        </div>
+                        <strong>{value}</strong>
+                        <small>{detail}</small>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="priors-layout">
+                    <section className="card timeline-card">
+                      <div className="section-heading">
+                        <div>
+                          <h2>Your longitudinal record</h2>
+                          <p>Different moments. One continuous story.</p>
+                        </div>
+                        <span className="quiet-pill">
+                          {state.records.length} records
+                        </span>
+                      </div>
+                      <div className="timeline-toolbar">
+                        <div
+                          className="tabs"
+                          role="tablist"
+                          aria-label="Record types"
+                        >
+                          {categories.map((c) => (
+                            <button
+                              key={c}
+                              role="tab"
+                              aria-selected={filter === c}
+                              className={filter === c ? "selected" : ""}
+                              onClick={() => setFilter(c)}
+                            >
+                              {c}
+                            </button>
+                          ))}
+                        </div>
+                        <label className="search-field">
+                          <Search size={16} />
+                          <input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search your medical history..."
+                            aria-label="Search your medical history"
+                          />
+                          {query && (
+                            <button
+                              aria-label="Clear search"
+                              onClick={() => setQuery("")}
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </label>
+                      </div>
+                      <div className="timeline">
+                        {(() => {
+                          const filtered = state.records.filter(
+                            (r) =>
+                              (filter === "All" || r.category === filter) &&
+                              `${r.title} ${r.summary} ${r.specialty} ${r.date}`
+                                .toLowerCase()
+                                .includes(query.toLowerCase()),
+                          );
+                          if (!filtered.length)
+                            return (
+                              <Empty title="No matching records">
+                                Try another search or choose a different record
+                                type.
+                              </Empty>
+                            );
+                          return filtered.map((r, i) => (
+                            <div key={r.id}>
+                              {(i === 0 ||
+                                filtered[i - 1].date.slice(0, 4) !==
+                                  r.date.slice(0, 4)) && (
+                                <div className="year-separator">
+                                  <span>{r.date.slice(0, 4)}</span>
+                                  <div />
+                                </div>
+                              )}
+                              <button
+                                className="record-row"
+                                onClick={() => setRecord(r)}
+                              >
+                                <div
+                                  className={`record-icon ${r.category.toLowerCase()}`}
+                                >
+                                  {(() => {
+                                    const Icon = categoryIcons[r.category];
+                                    return <Icon size={18} />;
+                                  })()}
+                                </div>
+                                <div className="record-main">
+                                  <div className="record-title">
+                                    <strong>{r.title}</strong>
+                                    {r.id === followupRecord.id && (
+                                      <span className="tiny-tag green">
+                                        Imported
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p>{r.summary}</p>
+                                  <div className="record-meta">
+                                    <span>{r.specialty}</span>
+                                    <span>·</span>
+                                    <span>{r.category}</span>
+                                  </div>
+                                </div>
+                                <div className="record-right">
+                                  <time>{date(r.date)}</time>
+                                  <span>
+                                    View <ArrowRight size={13} />
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    </section>
+                    <aside className="priors-aside">
+                      <section className="prepare-card">
+                        <div className="orbit-illustration" aria-hidden="true">
+                          <span className="orbit-ring" />
+                          <span className="orbit-core">
+                            <Sparkles size={26} />
+                          </span>
+                          <span className="orbit-dot one">
+                            <ScanLine size={17} />
+                          </span>
+                          <span className="orbit-dot two">
+                            <FlaskConical size={17} />
+                          </span>
+                          <span className="orbit-dot three">
+                            <Pill size={17} />
+                          </span>
+                        </div>
+                        <span className="eyebrow blue-text">
+                          GO INTO YOUR VISIT INFORMED
+                        </span>
+                        <h2>
+                          A clearer picture.
+                          <br />A better conversation.
+                        </h2>
+                        <p>
+                          Bring your history together into a brief worth
+                          discussing with your care team.
+                        </p>
+                        <Button onClick={prepare} primary disabled={busy}>
+                          <Sparkles size={16} />
+                          Prepare My Visit
+                          <ArrowRight size={15} />
+                        </Button>
+                        <small>Built from your available evidence</small>
+                      </section>
+                      <section className="card aside-card">
+                        <div className="small-heading">
+                          <ShieldCheck size={17} />
+                          <h3>Clarity, with context</h3>
+                        </div>
+                        <p>
+                          Every finding links to its source. Uncertainty stays
+                          visible. You can inspect the whole picture.
+                        </p>
+                        <div className="aside-rule" />
+                        <div className="small-heading">
+                          <Database size={16} />
+                          <span>Persistent memory</span>
+                        </div>
+                        <Badge tone={connected ? "green" : "neutral"}>
+                          GBrain {connected ? "Connected" : "Not Connected"}
+                        </Badge>
+                        <Link href="/memory" className="inline-link">
+                          Explore your memory
+                          <ArrowRight size={14} />
+                        </Link>
+                      </section>
+                      <div className="synthetic-note">
+                        <FlaskConical size={15} />
+                        <p>
+                          All records are synthetic FHIR R4 demo data. No real
+                          patient information.
+                        </p>
+                      </div>
+                    </aside>
+                  </div>
+                </>
+              )}
+              {path === "/brief" &&
+                (run?.status === "complete" ? (
+                  <>
+                    <div className="brief-hero">
+                      <div className="brief-hero-number">
+                        {findings.length}
+                        <span>things</span>
+                      </div>
+                      <div>
+                        <h2>
+                          Worth discussing
+                          <br />
+                          with your care team
+                        </h2>
+                        <p>
+                          BiblioTech reviewed your available priors and surfaced
+                          questions
+                          <br className="desktop-break" /> that may be useful at
+                          your next appointment.
+                        </p>
+                      </div>
+                      <span className="hero-seal">
+                        <ShieldCheck size={29} />
+                        <small>
+                          EVIDENCE
+                          <br />
+                          REVIEWED
+                        </small>
+                      </span>
+                    </div>
+                    {imported && (
+                      <div className="success-banner">
+                        <CircleCheck size={18} />
+                        <span>
+                          The breast-imaging follow-up is now matched. It no
+                          longer appears as an open question.
+                        </span>
+                        <button
+                          className="inline-link"
+                          onClick={() =>
+                            setRecord(
+                              state.records.find(
+                                (r) => r.id === followupRecord.id,
+                              )!,
+                            )
+                          }
+                        >
+                          View report
+                          <ArrowRight size={14} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="brief-layout">
+                      <section className="finding-list">
+                        {findings.map((f, i) => (
+                          <div key={f.id} className="finding-section">
+                            <div className="section-kicker">
+                              <span>0{i + 1}</span>
+                              {f.id === "follow-up"
+                                ? "FOLLOW-UPS"
+                                : f.id === "medication"
+                                  ? "MEDICATION RECONCILIATION"
+                                  : "CROSS-SPECIALTY SIGNAL"}
+                            </div>
+                            <article
+                              className={`card finding-card ${f.id === "cross-specialty-cardiovascular" ? "featured-finding" : ""}`}
+                            >
+                              <div className="finding-top">
+                                <IconBox
+                                  icon={
+                                    f.id === "follow-up"
+                                      ? ScanLine
+                                      : f.id === "medication"
+                                        ? Pill
+                                        : GitBranch
+                                  }
+                                  tone={
+                                    f.id === "cross-specialty-cardiovascular"
+                                      ? "blue"
+                                      : "amber"
+                                  }
+                                />
+                                <Badge
+                                  tone={
+                                    f.status === "inferred" ? "blue" : "amber"
+                                  }
+                                >
+                                  {f.status === "inferred"
+                                    ? "For clinician review"
+                                    : "Unresolved"}
+                                </Badge>
+                              </div>
+                              <h3>{f.title}</h3>
+                              <p>{f.statement}</p>
+                              <div className="finding-footer">
+                                <span className="evidence-count">
+                                  <FileCheck2 size={14} />
+                                  {f.evidenceIds.length} source
+                                  {f.evidenceIds.length === 1 ? "" : "s"}
+                                  {f.id === "follow-up"
+                                    ? " · Mar 12, 2024"
+                                    : ""}
+                                </span>
+                                <button
+                                  className="inline-link"
+                                  onClick={() => viewEvidence(f)}
+                                >
+                                  View Evidence
+                                  <ArrowRight size={15} />
+                                </button>
+                              </div>
+                            </article>
+                          </div>
+                        ))}
+                      </section>
+                      <aside className="card questions">
+                        <div className="small-heading">
+                          <BookOpen size={18} />
+                          <h2>Questions for your doctor</h2>
+                        </div>
+                        <p className="muted">
+                          A starting point for your next conversation.
+                        </p>
+                        <ol>
+                          {[
+                            ...(!imported
+                              ? [
+                                  "Was the recommended breast-imaging follow-up completed, and is the report available?",
+                                ]
+                              : []),
+                            "Are the recent LDL and blood-pressure trends worth reviewing together with the imaging finding?",
+                            "What atorvastatin dose should be considered current?",
+                            "Are there additional records that should be added to my longitudinal history?",
+                          ].map((q) => (
+                            <li key={q}>{q}</li>
+                          ))}
+                        </ol>
+                        <div className="questions-footer">
+                          <Sparkles size={17} />
+                          <p>
+                            Your next visit starts
+                            <br />
+                            with a little more context.
+                          </p>
+                        </div>
+                      </aside>
+                    </div>
+                    <p className="page-disclaimer">
+                      <ShieldCheck size={15} />
+                      BiblioTech surfaces questions and evidence for review. It
+                      does not provide medical diagnoses.
+                    </p>
+                  </>
+                ) : (
+                  <section className="card">
+                    <Empty
+                      icon={Sparkles}
+                      title={
+                        run?.status === "failed"
+                          ? "The previous run needs another try"
+                          : "Your next conversation starts here"
+                      }
+                      action={
+                        <Button primary onClick={prepare} disabled={busy}>
+                          Prepare My Visit
+                          <ArrowRight size={16} />
+                        </Button>
+                      }
+                    >
+                      Prepare a fresh brief from your available records and
+                      inspectable memory.
+                    </Empty>
+                  </section>
+                ))}
+              {path === "/insights/cross-specialty-cardiovascular" &&
+                (() => {
+                  const f = findings.find(
+                    (f) => f.id === "cross-specialty-cardiovascular",
+                  );
+                  return f ? (
+                    <>
+                      <Link href="/brief" className="back-link">
+                        <ArrowLeft size={14} />
+                        Back to your brief
+                      </Link>
+                      <section className="card insight-finding">
+                        <div className="insight-heading">
+                          <IconBox icon={GitBranch} />
+                          <div>
+                            <span className="eyebrow">
+                              CARDIOVASCULAR CONTEXT
+                            </span>
+                            <h2>Potential cross-specialty signal</h2>
+                          </div>
+                          <Badge tone="blue">For clinician review</Badge>
+                        </div>
+                        <p>{f.statement}</p>
+                        <div className="classification">
+                          <span>
+                            Classification <strong>Inferred</strong>
+                          </span>
+                          <span>
+                            Uncertainty <strong>Moderate</strong>
+                          </span>
+                          <span>
+                            <FileCheck2 size={14} />
+                            <strong>
+                              {f.evidenceIds.length} linked sources
+                            </strong>
+                          </span>
+                        </div>
+                      </section>
+                      <section className="card evidence-map">
+                        <div className="section-heading">
+                          <div>
+                            <h2>How the evidence connects</h2>
+                            <p>
+                              Three perspectives, considered together. A
+                              question to review.
+                            </p>
+                          </div>
+                          <span className="quiet-pill">
+                            <GitBranch size={13} />
+                            Evidence map
+                          </span>
+                        </div>
+                        <div className="evidence-nodes">
+                          <button
+                            className="evidence-node"
+                            onClick={() =>
+                              setRecord(
+                                state.records.find(
+                                  (r) => r.id === cardiacIds[0],
+                                )!,
+                              )
+                            }
+                          >
+                            <span className="node-heading">
+                              <IconBox icon={ScanLine} />
+                              <strong>Breast Imaging</strong>
+                              <ArrowUpRight size={15} />
+                            </span>
+                            <span className="node-date">June 4, 2025</span>
+                            <span className="imaging-observation">
+                              Breast arterial
+                              <br />
+                              calcifications noted
+                            </span>
+                            <span className="node-foot">
+                              Incidental observation · Otherwise benign
+                            </span>
+                          </button>
+                          <div className="evidence-node">
+                            <span className="node-heading">
+                              <IconBox icon={FlaskConical} />
+                              <strong>Lipid Trend</strong>
+                              <span className="muted unit">LDL mg/dL</span>
+                            </span>
+                            <div className="lipid-bars">
+                              {lipidRecords.map((r) => (
+                                <button
+                                  key={r.id}
+                                  onClick={() =>
+                                    setRecord(
+                                      state.records.find((x) => x.id === r.id)!,
+                                    )
+                                  }
+                                  aria-label={`Open ${r.date.slice(0, 4)} lipid result`}
+                                >
+                                  <strong>
+                                    {r.resource.valueQuantity!.value}
+                                  </strong>
+                                  <span
+                                    style={{
+                                      height: `${(r.resource.valueQuantity!.value - 90) * 1.05}px`,
+                                    }}
+                                  />
+                                  <small>{r.date.slice(0, 4)}</small>
+                                </button>
+                              ))}
+                            </div>
+                            <span className="node-foot">
+                              5 results · 2021–2025
+                            </span>
+                          </div>
+                          <div className="evidence-node">
+                            <span className="node-heading">
+                              <IconBox icon={History} />
+                              <strong>Blood Pressure</strong>
+                              <span className="muted unit">mmHg</span>
+                            </span>
+                            <div className="bp-values">
+                              {bpRecords.map((r) => (
+                                <button
+                                  key={r.id}
+                                  onClick={() =>
+                                    setRecord(
+                                      state.records.find((x) => x.id === r.id)!,
+                                    )
+                                  }
+                                >
+                                  <span>{r.date.slice(0, 4)}</span>
+                                  <strong>
+                                    {
+                                      r.resource.component![0].valueQuantity
+                                        .value
+                                    }
+                                    <small>
+                                      {" "}
+                                      /{" "}
+                                      {
+                                        r.resource.component![1].valueQuantity
+                                          .value
+                                      }
+                                    </small>
+                                  </strong>
+                                  <span className="bp-track">
+                                    <i
+                                      style={{
+                                        width: `${r.resource.component![0].valueQuantity.value - 80}%`,
+                                      }}
+                                    />
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                            <span className="node-foot">
+                              4 measurements · 2022–2025
+                            </span>
+                          </div>
+                        </div>
+                        <div className="graph-connectors" aria-hidden="true">
+                          <svg viewBox="0 0 900 62" preserveAspectRatio="none">
+                            <path
+                              d="M150 0 V22 Q150 32 160 32 H440 Q450 32 450 42 V62 M450 0 V62 M750 0 V22 Q750 32 740 32 H460 Q450 32 450 42"
+                              fill="none"
+                              stroke="#b7c8eb"
+                              strokeWidth="1.5"
+                            />
+                            <circle cx="150" cy="2" r="3" fill="#4169e1" />
+                            <circle cx="450" cy="2" r="3" fill="#4169e1" />
+                            <circle cx="750" cy="2" r="3" fill="#4169e1" />
+                          </svg>
+                        </div>
+                        <div className="conclusion-node">
+                          <GitBranch size={19} />
+                          <div>
+                            <strong>Potential cardiovascular context</strong>
+                            <span>
+                              A connection for clinician review, with
+                              uncertainty preserved.
+                            </span>
+                          </div>
+                          <Badge tone="blue">Inferred</Badge>
+                        </div>
+                      </section>
+                      <div className="evidence-bottom">
+                        <section className="card sources">
+                          <div className="section-heading">
+                            <div>
+                              <h2>Source records</h2>
+                              <p>
+                                Open the exact evidence behind this connection.
+                              </p>
+                            </div>
+                            <span className="quiet-pill">
+                              {f.evidenceIds.length}
+                            </span>
+                          </div>
+                          {f.evidenceIds.map(sourceButton)}
+                        </section>
+                        <aside className="card reviewer-card">
+                          <IconBox icon={ShieldCheck} tone="green" />
+                          <h3>Reviewer Agent</h3>
+                          <Badge tone="green">Evidence check passed</Badge>
+                          <ul>
+                            {f.reviewer.reasons.map((reason) => (
+                              <li key={reason}>
+                                <Check size={15} />
+                                {reason}
+                              </li>
+                            ))}
+                          </ul>
+                          <Link href="/agents" className="inline-link">
+                            View the full agent run
+                            <ArrowRight size={14} />
+                          </Link>
+                        </aside>
+                      </div>
+                    </>
+                  ) : (
+                    <section className="card">
+                      <Empty
+                        icon={ShieldCheck}
+                        title="Finding withheld"
+                        action={
+                          <Button primary onClick={prepare}>
+                            Prepare My Visit
+                          </Button>
+                        }
+                      >
+                        No current, reviewed finding is available. Prepare your
+                        brief to retrieve the supporting evidence.
+                      </Empty>
+                    </section>
+                  );
+                })()}
+              {path === "/agents" &&
+                (run ? (
+                  <>
+                    <div className="run-summary card">
+                      <div>
+                        <span className="eyebrow">WORKFLOW RUN</span>
+                        <h3>{run.id}</h3>
+                        <Badge
+                          tone={
+                            run.status === "complete"
+                              ? "green"
+                              : run.status === "failed"
+                                ? "red"
+                                : "blue"
+                          }
+                        >
+                          {run.status === "complete" ? "Completed" : run.status}
+                        </Badge>
+                      </div>
+                      <div>
+                        <small>Started</small>
+                        <strong>{time(run.startedAt)}</strong>
+                      </div>
+                      <div>
+                        <small>Completed</small>
+                        <strong>
+                          {run.completedAt ? time(run.completedAt) : "—"}
+                        </strong>
+                      </div>
+                      <div>
+                        <small>Duration</small>
+                        <strong>
+                          {run.completedAt
+                            ? `${((Date.parse(run.completedAt) - Date.parse(run.startedAt)) / 1000).toFixed(2)} sec`
+                            : "In progress"}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="run-metrics">
+                      {[
+                        [run.reviewedIds.length, "records reviewed"],
+                        [
+                          run.findings.length + run.rejected.length,
+                          "candidate findings",
+                        ],
+                        [run.findings.length, "evidence-supported"],
+                        [run.rejected.length, "rejected"],
+                      ].map(([value, label]) => (
+                        <div key={label}>
+                          <strong>{value}</strong>
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="agents-layout">
+                      <section>
+                        <div className="section-heading flush">
+                          <div>
+                            <h2>From history to understanding</h2>
+                            <p>
+                              Actual execution of the demo’s deterministic
+                              workflow.
+                            </p>
+                          </div>
+                          <span className="quiet-pill">
+                            5 specialized agents
+                          </span>
+                        </div>
+                        <div className="pipeline">
+                          {run.steps.map((step, i) => (
+                            <div className="pipeline-item" key={step.name}>
+                              <span className="pipeline-index">0{i + 1}</span>
+                              <article className="card agent-card">
+                                <div className="agent-card-heading">
+                                  <h3>{step.name}</h3>
+                                  <Badge
+                                    tone={
+                                      step.status === "complete"
+                                        ? "green"
+                                        : step.status === "failed"
+                                          ? "red"
+                                          : "neutral"
+                                    }
+                                  >
+                                    {step.status === "complete"
+                                      ? "Complete"
+                                      : step.status}
+                                  </Badge>
+                                </div>
+                                <p>{step.activity}</p>
+                                <div className="scope-chips">
+                                  <LockKeyhole size={12} />
+                                  {step.scopes.map((s) => (
+                                    <span key={s}>{s}</span>
+                                  ))}
+                                </div>
+                              </article>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                      <aside>
+                        <section className="card rejected-card">
+                          <div className="small-heading">
+                            <ShieldX size={19} />
+                            <h2>Knowing what to withhold</h2>
+                          </div>
+                          <p className="muted">Evidence sets the boundary.</p>
+                          {run.rejected.map((f) => (
+                            <article className="rejection" key={f.id}>
+                              <span className="rejected-label">REJECTED</span>
+                              <blockquote>“{f.statement}”</blockquote>
+                              <p>{f.reviewer.reasons.join(" ")}</p>
+                            </article>
+                          ))}
+                          {!run.rejected.length && (
+                            <p>No candidates rejected in this run.</p>
+                          )}
+                          <div className="review-note">
+                            <ShieldCheck size={16} />
+                            <span>
+                              Checked by deterministic evidence and language
+                              rules.
+                            </span>
+                          </div>
+                        </section>
+                        <Link href="/access" className="card access-shortcut">
+                          <Fingerprint size={22} />
+                          <span>
+                            <strong>Purpose-limited access</strong>
+                            <small>Inspect this run’s access ledger</small>
+                          </span>
+                          <ArrowUpRight size={17} />
+                        </Link>
+                      </aside>
+                    </div>
+                  </>
+                ) : (
+                  <section className="card">
+                    <Empty
+                      icon={GitBranch}
+                      title="No active agent run"
+                      action={
+                        <Button onClick={prepare} primary disabled={busy}>
+                          Prepare My Visit
+                        </Button>
+                      }
+                    >
+                      Prepare your visit brief to see actual agent activity,
+                      review decisions, and timing.
+                    </Empty>
+                  </section>
+                ))}
+              {path === "/memory" && (
+                <>
+                  {!connected && (
+                    <div className="connection-banner">
+                      <span className="connection-icon">
+                        <Database size={23} />
+                      </span>
+                      <div>
+                        <h3>GBrain isn’t connected.</h3>
+                        <p>
+                          The health record remains available, but persistent
+                          memory is unavailable.
+                        </p>
+                        <small>{state.connection.message}</small>
+                      </div>
+                      <Button onClick={() => setModal("connect")}>
+                        Connect GBrain
+                        <ArrowUpRight size={15} />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="memory-toolbar">
+                    <div
+                      className="tabs"
+                      role="tablist"
+                      aria-label="Memory categories"
+                    >
+                      {[
+                        "All",
+                        "Open Follow-Ups",
+                        "Reviewed Findings",
+                        "Medications",
+                        "Preferences",
+                        "Resolved",
+                      ].map((t) => (
+                        <button
+                          role="tab"
+                          aria-selected={memoryTab === t}
+                          key={t}
+                          className={memoryTab === t ? "selected" : ""}
+                          onClick={() => setMemoryTab(t)}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => action("sync")}
+                      disabled={busy || !connected}
+                    >
+                      <RotateCcw size={14} />
+                      Sync Memory
+                    </Button>
+                  </div>
+                  <div className="memory-layout">
+                    <section>
+                      {connected ? (
+                        (() => {
+                          const shown = state.memory.filter(
+                            (m) =>
+                              memoryTab === "All" ||
+                              (memoryTab === "Open Follow-Ups" &&
+                                m.category === "follow_up") ||
+                              (memoryTab === "Reviewed Findings" &&
+                                m.category === "finding") ||
+                              (memoryTab === "Medications" &&
+                                m.category === "medication") ||
+                              (memoryTab === "Preferences" &&
+                                m.category === "preference") ||
+                              (memoryTab === "Resolved" &&
+                                m.status === "resolved"),
+                          );
+                          return shown.length ? (
+                            shown.map((m) => (
+                              <MemoryCard
+                                key={m.id}
+                                entry={m}
+                                state={state}
+                                openSource={setRecord}
+                              />
+                            ))
+                          ) : (
+                            <div className="card">
+                              <Empty
+                                icon={Database}
+                                title={
+                                  memoryTab === "All"
+                                    ? "No demo memory saved yet"
+                                    : "No memory in this category"
+                                }
+                                action={
+                                  memoryTab === "All" ? (
+                                    <Button onClick={prepare} primary>
+                                      Prepare My Visit
+                                    </Button>
+                                  ) : undefined
+                                }
+                              >
+                                Memory shown here is read directly from your
+                                configured GBrain workspace.
+                              </Empty>
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <div className="card">
+                          <Empty
+                            icon={Database}
+                            title="A place for context that lasts"
+                            action={
+                              <Button onClick={() => setModal("connect")}>
+                                Set up persistent memory
+                                <ArrowRight size={15} />
+                              </Button>
+                            }
+                          >
+                            Connect your synthetic-demo GBrain workspace to
+                            inspect remembered findings, source evidence, and
+                            resolved questions.
+                          </Empty>
+                        </div>
+                      )}
+                      {imported && (
+                        <div className="card local-resolution">
+                          <div className="small-heading">
+                            <CircleCheck size={21} />
+                            <h3>Follow-up matched in your records</h3>
+                            <Badge tone="green">Matched</Badge>
+                          </div>
+                          <p>
+                            The September 18, 2024 imaging report is now linked
+                            to the March recommendation. Your next brief will
+                            use this evidence.
+                          </p>
+                          <p className="muted">
+                            {connected
+                              ? "Persistent memory was read from GBrain above."
+                              : "This is local record reconciliation. It does not confirm a GBrain memory update."}
+                          </p>
+                          <button
+                            className="inline-link"
+                            onClick={() =>
+                              setRecord(
+                                state.records.find(
+                                  (r) => r.id === followupRecord.id,
+                                )!,
+                              )
+                            }
+                          >
+                            View imported evidence
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </section>
+                    <aside>
+                      <section className="card memory-explainer">
+                        <span className="eyebrow">
+                          THE NEXT PIECE OF THE STORY
+                        </span>
+                        <IconBox icon={FileCheck2} />
+                        <h2>
+                          New evidence.
+                          <br />
+                          Updated understanding.
+                        </h2>
+                        <p>
+                          Add the follow-up report to connect a recommendation
+                          with its outcome.
+                        </p>
+                        <div className="resolution-path">
+                          <Badge tone="amber">Unresolved</Badge>
+                          <ArrowDown size={18} />
+                          <Badge tone="green">Resolved</Badge>
+                        </div>
+                        <Button
+                          onClick={() => setModal("import")}
+                          disabled={busy || imported}
+                        >
+                          <Upload size={15} />
+                          {imported
+                            ? "Follow-up record imported"
+                            : "Import Follow-Up Record"}
+                        </Button>
+                        <small>
+                          {imported
+                            ? "The source record is available in your priors."
+                            : "Synthetic report · September 18, 2024"}
+                        </small>
+                      </section>
+                      <section className="card session-card">
+                        <div className="small-heading">
+                          <History size={19} />
+                          <h3>Start with a fresh session</h3>
+                        </div>
+                        <p>
+                          Clear the current brief. Your records and GBrain
+                          memory stay with you.
+                        </p>
+                        <Button onClick={() => action("fresh")} disabled={busy}>
+                          Start Fresh Session
+                          <ArrowRight size={15} />
+                        </Button>
+                      </section>
+                    </aside>
+                  </div>
+                </>
+              )}
+              {path === "/access" && (
+                <>
+                  <section className="access-principle">
+                    <span className="principle-icon">
+                      <Fingerprint size={38} />
+                    </span>
+                    <div>
+                      <span className="eyebrow">YOU STAY IN CONTROL</span>
+                      <h2>
+                        Agents get access for a purpose,
+                        <br />
+                        not permanent keys to your health.
+                      </h2>
+                    </div>
+                    <ShieldCheck size={30} />
+                  </section>
+                  {(() => {
+                    const latest = [...state.ledger]
+                      .reverse()
+                      .find(
+                        (e) =>
+                          e.actor === "Cross-Specialty Agent" &&
+                          e.result === "Allowed",
+                      );
+                    return latest ? (
+                      <section className="card access-request">
+                        <div className="section-heading">
+                          <div className="small-heading">
+                            <IconBox icon={GitBranch} />
+                            <div>
+                              <span className="eyebrow">
+                                LATEST CROSS-SPECIALTY REQUEST
+                              </span>
+                              <h3>Cross-Specialty Agent</h3>
+                            </div>
+                          </div>
+                          <Badge tone="green">Access granted</Badge>
+                        </div>
+                        <div className="access-details">
+                          <div>
+                            <small>Purpose</small>
+                            <strong>Prepare visit brief</strong>
+                          </div>
+                          <div>
+                            <small>Requested resources</small>
+                            <strong>{latest.scopes.join(" · ")}</strong>
+                          </div>
+                          <div>
+                            <small>Access mode</small>
+                            <strong>
+                              <LockKeyhole size={13} />
+                              Read only
+                            </strong>
+                          </div>
+                          <div>
+                            <small>Duration</small>
+                            <strong>This run only</strong>
+                          </div>
+                        </div>
+                        <div className="request-run">
+                          <span>Run</span>
+                          <code>{latest.runId}</code>
+                          <span>Grant expired when the run completed</span>
+                        </div>
+                      </section>
+                    ) : null;
+                  })()}
+                  <section className="card ledger-card">
+                    <div className="section-heading">
+                      <div>
+                        <h2>Access ledger</h2>
+                        <p>
+                          Every request. Every decision. An inspectable record.
+                        </p>
+                      </div>
+                      <span className="quiet-pill">
+                        {state.ledger.length} events
+                      </span>
+                    </div>
+                    {state.ledger.length ? (
+                      <div className="table-scroll">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>TIME</th>
+                              <th>ACTOR</th>
+                              <th>DATA</th>
+                              <th>PURPOSE</th>
+                              <th>RESULT</th>
+                              <th>
+                                <span className="sr-only">Details</span>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[...state.ledger].reverse().map((e) => (
+                              <tr
+                                key={e.id}
+                                className={
+                                  e.result === "Denied" ? "denied-row" : ""
+                                }
+                              >
+                                <td>
+                                  <time>{time(e.timestamp)}</time>
+                                </td>
+                                <td>
+                                  <button
+                                    className="actor-button"
+                                    onClick={() => setEvent(e)}
+                                  >
+                                    {e.result === "Denied" ? (
+                                      <ShieldX size={15} />
+                                    ) : (
+                                      <GitBranch size={15} />
+                                    )}
+                                    <strong>{e.actor}</strong>
+                                  </button>
+                                </td>
+                                <td>{e.scopes.join(" + ")}</td>
+                                <td>{e.purpose}</td>
+                                <td>
+                                  <Badge
+                                    tone={
+                                      e.result === "Denied" ? "red" : "green"
+                                    }
+                                  >
+                                    {e.result}
+                                  </Badge>
+                                </td>
+                                <td>
+                                  <button
+                                    className="icon-button"
+                                    aria-label={`Open ${e.actor} access event`}
+                                    onClick={() => setEvent(e)}
+                                  >
+                                    <ArrowUpRight size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <Empty
+                        icon={Fingerprint}
+                        title="No access events yet"
+                        action={
+                          <Button onClick={prepare} primary>
+                            Prepare My Visit
+                          </Button>
+                        }
+                      >
+                        Run the workflow to see enforced permissions and a
+                        denied research request.
+                      </Empty>
+                    )}
+                  </section>
+                  <div className="ledger-footnote">
+                    <ShieldCheck size={16} />
+                    <p>
+                      The demo includes an intentional research-scope probe. Its
+                      denied request returns no patient records. No external
+                      research call is made.
+                    </p>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+          <footer className="app-footer">
+            <span>BiblioTech Health</span>
+            <span>
+              <span className="footer-dot" />
+              All records synthetic · Built around evidence
+            </span>
+          </footer>
+        </main>
+      </div>
+      {toast && (
+        <div className="toast" role="status">
+          <CircleCheck size={18} />
+          {toast}
+          <button
+            className="icon-button"
+            aria-label="Dismiss notification"
+            onClick={() => setToast("")}
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
+      {busy && operation && (
+        <Modal title={operation} dismissible={false} onClose={() => {}}>
+          <div className="progress-emblem">
+            <Sparkles size={27} />
+          </div>
+          <p className="modal-description">
+            Connecting your records, checking the evidence, and preserving the
+            context.
+          </p>
+          <div className="progress-list" aria-live="polite">
+            {progress.map((label, i) => (
+              <div key={`${i}-${label}`}>
+                <Check size={16} />
+                <span>{label}</span>
+              </div>
+            ))}
+            <div className="progress-active">
+              <span className="progress-dot" />
+              Working with your available records…
+            </div>
+          </div>
+        </Modal>
+      )}
+      {modal === "import" && (
+        <Modal
+          title="Import synthetic FHIR record"
+          onClose={() => setModal(null)}
+        >
+          <p className="modal-description">
+            One new report can answer an open question.
+          </p>
+          <div className="file-preview">
+            <FileJson size={26} />
+            <div>
+              <strong>followup-mammogram-2024-09.json</strong>
+              <small>FHIR R4 · DiagnosticReport · Synthetic data</small>
+            </div>
+            <Badge tone="blue">Ready</Badge>
+          </div>
+          <div className="import-preview">
+            <span className="eyebrow">SEPTEMBER 18, 2024</span>
+            <h3>Diagnostic Mammogram</h3>
+            <p>Stable appearance compared with prior examination.</p>
+            <div>
+              <Check size={16} />
+              Return to routine annual screening.
+            </div>
+          </div>
+          <div className="import-link">
+            <GitBranch size={16} />
+            <span>Matches the March 12, 2024 follow-up recommendation.</span>
+          </div>
+          {!connected && (
+            <p className="import-notice">
+              GBrain is disconnected. The record can be imported locally;
+              persistent memory will remain unavailable until connected.
+            </p>
+          )}
+          <div className="modal-actions">
+            <a
+              className="text-button"
+              href="/fixtures/followup-mammogram-2024-09.json"
+              download
+            >
+              Download fixture
+              <ArrowDown size={14} />
+            </a>
+            <Button
+              primary
+              disabled={busy || imported}
+              onClick={() =>
+                action("import", { record: followupRecord.resource })
+              }
+            >
+              {imported ? "Already imported" : "Import Record"}
+              <ArrowRight size={16} />
+            </Button>
+          </div>
+        </Modal>
+      )}
+      {modal === "reset" && (
+        <Modal title="Reset the synthetic demo" onClose={() => setModal(null)}>
+          <p className="modal-description">
+            Restore the original 25 records and clear local briefs and access
+            events.
+          </p>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={resetGBrain}
+              onChange={(e) => setResetGBrain(e.target.checked)}
+            />
+            Also reset GBrain demo memory?
+          </label>
+          <p className="muted">
+            Default: No. Preserved GBrain memory is recalled on the next session
+            or brief. Checking this removes only snapshots in this demo’s
+            configured namespace.
+          </p>
+          <div className="modal-actions">
+            <Button onClick={() => setModal(null)}>Cancel</Button>
+            <Button
+              primary
+              disabled={busy}
+              onClick={() => action("reset", { resetGBrain })}
+            >
+              Reset Demo
+            </Button>
+          </div>
+        </Modal>
+      )}
+      {modal === "connect" && (
+        <Modal title="Connect GBrain memory" onClose={() => setModal(null)}>
+          <p className="modal-description">
+            Use a dedicated workspace containing synthetic demo data only.
+          </p>
+          <ol className="setup-steps">
+            <li>
+              In GBrain, create a client and add the demo workspace’s Memory
+              application with Full permission.
+            </li>
+            <li>
+              Add a connection. Store its token as <code>GBRAIN_TOKEN</code> in
+              this app’s server-only <code>.env.local</code>.
+            </li>
+            <li>
+              Restart the app, then check the connection. Prepare a brief or
+              sync memory to save and verify the demo entries.
+            </li>
+          </ol>
+          <p className="muted">
+            Tokens stay on the server. The app confirms writes with a separate
+            memory read.
+          </p>
+          <div className="modal-actions">
+            <a
+              href="https://gbrain.io/docs/workspace/memory-anywhere"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-link"
+            >
+              GBrain setup guide
+              <ArrowUpRight size={15} />
+            </a>
+            <Button primary onClick={() => action("check")}>
+              Check Connection
+            </Button>
+          </div>
+        </Modal>
+      )}
+      {record && (
+        <Modal title="Source record" drawer onClose={() => setRecord(null)}>
+          <div className="drawer-record-header">
+            <IconBox icon={categoryIcons[record.category]} />
+            <Badge tone="neutral">Synthetic FHIR R4</Badge>
+          </div>
+          <span className="eyebrow">{record.specialty.toUpperCase()}</span>
+          <h2 className="drawer-title">{record.title}</h2>
+          <p className="muted">
+            {date(record.date)} · {record.resource.resourceType}
+          </p>
+          <div className="source-observation">
+            <span className="eyebrow">RECORDED EVIDENCE</span>
+            <p>{record.summary}</p>
+          </div>
+          <dl className="detail-list">
+            <div>
+              <dt>Source ID</dt>
+              <dd>
+                <code>{record.id}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Record type</dt>
+              <dd>{record.resource.resourceType}</dd>
+            </div>
+            <div>
+              <dt>Provenance</dt>
+              <dd>Coherent synthetic demo fixture</dd>
+            </div>
+          </dl>
+          <details className="fhir-details">
+            <summary>
+              <FileJson size={16} />
+              Inspect FHIR resource
+              <ChevronDown size={16} />
+            </summary>
+            <pre>{JSON.stringify(record.resource, null, 2)}</pre>
+          </details>
+          <p className="drawer-note">
+            <ShieldCheck size={16} />
+            Source evidence is preserved as recorded. An inference is never
+            substituted for the original record.
+          </p>
+        </Modal>
+      )}
+      {evidence && (
+        <Modal
+          title="Evidence behind the finding"
+          drawer
+          onClose={() => setEvidence(null)}
+        >
+          <Badge tone={evidence.status === "inferred" ? "blue" : "amber"}>
+            {evidence.status === "inferred"
+              ? "For clinician review"
+              : "Unresolved"}
+          </Badge>
+          <h2 className="drawer-title">{evidence.title}</h2>
+          <p className="drawer-statement">{evidence.statement}</p>
+          <h3>Source records</h3>
+          {evidence.evidenceIds.map(sourceButton)}
+          <p className="drawer-note">
+            <ShieldCheck size={16} />
+            Reviewed against source evidence. Uncertainty preserved.
+          </p>
+        </Modal>
+      )}
+      {event && (
+        <Modal title="Access Event" drawer onClose={() => setEvent(null)}>
+          <IconBox
+            icon={event.result === "Denied" ? ShieldX : ShieldCheck}
+            tone={event.result === "Denied" ? "red" : "green"}
+          />
+          <h2 className="drawer-title">{event.actor}</h2>
+          <Badge tone={event.result === "Denied" ? "red" : "green"}>
+            {event.result === "Denied" ? "DENIED" : "ALLOWED"}
+          </Badge>
+          <dl className="detail-list">
+            <div>
+              <dt>Requested</dt>
+              <dd>{event.scopes.join(" + ")}</dd>
+            </div>
+            <div>
+              <dt>Purpose</dt>
+              <dd>{event.purpose}</dd>
+            </div>
+            <div>
+              <dt>Policy</dt>
+              <dd>
+                {event.actor === "Research Agent"
+                  ? "Research agents may access de-identified metadata only."
+                  : "Access is read-only, purpose-scoped, and valid only within the active run."}
+              </dd>
+            </div>
+            <div>
+              <dt>Reason</dt>
+              <dd>{event.reason}</dd>
+            </div>
+            <div>
+              <dt>Records returned</dt>
+              <dd>{event.recordIds.length}</dd>
+            </div>
+            <div>
+              <dt>Timestamp</dt>
+              <dd>
+                {date(event.timestamp)} · {time(event.timestamp)}
+              </dd>
+            </div>
+            <div>
+              <dt>Run ID</dt>
+              <dd>
+                <code>{event.runId}</code>
+              </dd>
+            </div>
+          </dl>
+        </Modal>
+      )}
+    </div>
+  );
+}
+function MemoryCard({
+  entry: m,
+  state,
+  openSource,
+}: {
+  entry: HealthMemoryEntry;
+  state: DemoState;
+  openSource: (r: HealthRecord) => void;
+}) {
+  return (
+    <article
+      className={`card memory-card ${m.status === "resolved" ? "resolved-memory" : ""}`}
+    >
+      <div className="memory-card-top">
+        <span className="eyebrow">
+          {m.category.replaceAll("_", " ").toUpperCase()}
+        </span>
+        <Badge
+          tone={
+            m.status === "resolved"
+              ? "green"
+              : m.status === "reviewed"
+                ? "blue"
+                : "amber"
+          }
+        >
+          {m.status === "resolved"
+            ? "Resolved"
+            : m.status === "reviewed"
+              ? "For clinician review"
+              : "Unresolved"}
+        </Badge>
+      </div>
+      <h3>{m.title}</h3>
+      <p>{m.statement}</p>
+      <div className="memory-metadata">
+        <div>
+          <small>Created</small>
+          <span>{date(m.createdAt)}</span>
+        </div>
+        <div>
+          <small>Updated</small>
+          <span>
+            {date(m.updatedAt)} · {time(m.updatedAt)}
+          </span>
+        </div>
+        <div>
+          <small>Memory ID</small>
+          <code>{m.remoteId || m.id}</code>
+        </div>
+      </div>
+      {m.resolvedByEvidenceId && (
+        <div className="resolved-by">
+          <CheckCheck size={16} />
+          <span>
+            Resolved by <code>DiagnosticReport/{m.resolvedByEvidenceId}</code>
+          </span>
+        </div>
+      )}
+      <div className="memory-sources">
+        {m.evidenceIds.map((id) => {
+          const record = state.records.find((r) => r.id === id);
+          return record ? (
+            <button
+              key={id}
+              className="evidence-chip"
+              onClick={() => openSource(record)}
+            >
+              <FileCheck2 size={12} />
+              {id}
+              <ArrowUpRight size={12} />
+            </button>
+          ) : null;
+        })}
+      </div>
+      <div className="finding-footer">
+        <span className="evidence-count">
+          <Database size={13} />
+          Read from GBrain
+        </span>
+        {state.connection.workspaceUrl && (
+          <a
+            className="inline-link"
+            href={state.connection.workspaceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open in GBrain
+            <ArrowUpRight size={14} />
+          </a>
+        )}
+      </div>
+    </article>
+  );
 }

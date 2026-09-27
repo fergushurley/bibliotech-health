@@ -1,19 +1,129 @@
-import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
-const transport=vi.hoisted(()=>({facts:[] as {fact_id:string;fact:string}[],names:['recall','remember','forget'],failRecall:false,failWrite:false,dropWrite:false,calls:[] as {name:string;arguments:Record<string,unknown>}[]}));
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const transport = vi.hoisted(() => ({
+  facts: [] as { fact_id: string; fact: string }[],
+  names: ["recall", "remember", "forget"],
+  failRecall: false,
+  failWrite: false,
+  dropWrite: false,
+  calls: [] as { name: string; arguments: Record<string, unknown> }[],
+}));
 // Protocol contract fixture. This is test-only and cannot be selected by the application.
-vi.mock('@modelcontextprotocol/client',()=>({StreamableHTTPClientTransport:class{},Client:class{async connect(){}async close(){}async listTools(){return {tools:transport.names.map(name=>({name}))};}async callTool(call:{name:string;arguments:Record<string,unknown>}){transport.calls.push(call);if(call.name==='recall')return {structuredContent:transport.failRecall?{error:'unavailable'}:{facts:transport.facts},content:[]};if(call.name==='remember'){if(transport.failWrite)return {isError:true,content:[]};if(!transport.dropWrite)transport.facts.push({fact_id:`remote-${transport.facts.length+1}`,fact:String(call.arguments.fact)});return {structuredContent:{id:'remote-id'},content:[]};}if(call.name==='forget'){transport.facts=transport.facts.filter(f=>f.fact_id!==call.arguments.id);return {structuredContent:{expired:true},content:[]};}throw new Error('Unexpected tool');}}}));
-import { readMemory,writeMemory,resetRemoteMemory } from '../lib/gbrain';
-import { buildMemory } from '../lib/domain';
-import { initialRecords,followupRecord } from '../lib/data';
-beforeEach(()=>{process.env.GBRAIN_TOKEN='test-only-token';process.env.GBRAIN_ENTITY='test-demo';transport.facts=[];transport.names=['recall','remember','forget'];transport.failRecall=false;transport.failWrite=false;transport.dropWrite=false;transport.calls=[];});
-afterEach(()=>{delete process.env.GBRAIN_TOKEN;delete process.env.GBRAIN_ENTITY;});
-describe('real adapter contract using an isolated transport fixture',()=>{
-  it('reports missing credentials visibly without any calls',async()=>{delete process.env.GBRAIN_TOKEN;const result=await readMemory();expect(result.connection.connected).toBe(false);expect(result.memory).toEqual([]);expect(transport.calls).toEqual([]);});
-  it('requires both read and write tools before claiming a connection',async()=>{transport.names=['recall'];expect((await readMemory()).connection.connected).toBe(false);});
-  it('fails closed on recall errors without using cached or synthetic memory',async()=>{transport.failRecall=true;const result=await readMemory();expect(result.connection.connected).toBe(false);expect(result.memory).toEqual([]);});
-  it('writes attributed structured evidence and verifies it with an independent recall',async()=>{const entries=buildMemory([], [...initialRecords,followupRecord],[]);const saved=await writeMemory(entries,true);expect(saved[0].remoteId).toBe('remote-1');expect(transport.calls.map(c=>c.name)).toEqual(['remember','recall']);const result=await readMemory();expect(result.connection.connected).toBe(true);expect(result.importedFollowup).toBe(true);expect(result.memory[0].resolvedByEvidenceId).toBe(followupRecord.id);expect(transport.calls[0].arguments.provenance).toContain('synthetic');});
-  it('never treats a success response as proof when the subsequent read cannot find the write',async()=>{transport.dropWrite=true;await expect(writeMemory(buildMemory([], [...initialRecords,followupRecord],[]),true)).rejects.toThrow('could not be verified');});
-  it('surfaces write denial instead of silently persisting local memory',async()=>{transport.failWrite=true;await expect(writeMemory([],false)).rejects.toThrow('rejected');});
-  it('resets only its own namespace and verifies removal',async()=>{await writeMemory(buildMemory([], [...initialRecords,followupRecord],[]),true);transport.facts.push({fact_id:'foreign',fact:'Unrelated workspace note'});await resetRemoteMemory();expect(transport.facts).toEqual([{fact_id:'foreign',fact:'Unrelated workspace note'}]);expect(transport.calls.some(c=>c.name==='forget'&&c.arguments.id==='foreign')).toBe(false);});
-  it('rejects ambiguous recall tools',async()=>{transport.names=['memory_recall','other_recall','remember'];expect((await readMemory()).connection.connected).toBe(false);});
+vi.mock("@modelcontextprotocol/client", () => ({
+  StreamableHTTPClientTransport: class {},
+  Client: class {
+    async connect() {}
+    async close() {}
+    async listTools() {
+      return { tools: transport.names.map((name) => ({ name })) };
+    }
+    async callTool(call: { name: string; arguments: Record<string, unknown> }) {
+      transport.calls.push(call);
+      if (call.name === "recall")
+        return {
+          structuredContent: transport.failRecall
+            ? { error: "unavailable" }
+            : { facts: transport.facts },
+          content: [],
+        };
+      if (call.name === "remember") {
+        if (transport.failWrite) return { isError: true, content: [] };
+        if (!transport.dropWrite)
+          transport.facts.push({
+            fact_id: `remote-${transport.facts.length + 1}`,
+            fact: String(call.arguments.fact),
+          });
+        return { structuredContent: { id: "remote-id" }, content: [] };
+      }
+      if (call.name === "forget") {
+        transport.facts = transport.facts.filter(
+          (f) => f.fact_id !== call.arguments.id,
+        );
+        return { structuredContent: { expired: true }, content: [] };
+      }
+      throw new Error("Unexpected tool");
+    }
+  },
+}));
+import { readMemory, writeMemory, resetRemoteMemory } from "../lib/gbrain";
+import { buildMemory } from "../lib/domain";
+import { initialRecords, followupRecord } from "../lib/data";
+beforeEach(() => {
+  process.env.GBRAIN_TOKEN = "test-only-token";
+  process.env.GBRAIN_ENTITY = "test-demo";
+  transport.facts = [];
+  transport.names = ["recall", "remember", "forget"];
+  transport.failRecall = false;
+  transport.failWrite = false;
+  transport.dropWrite = false;
+  transport.calls = [];
+});
+afterEach(() => {
+  delete process.env.GBRAIN_TOKEN;
+  delete process.env.GBRAIN_ENTITY;
+});
+describe("real adapter contract using an isolated transport fixture", () => {
+  it("reports missing credentials visibly without any calls", async () => {
+    delete process.env.GBRAIN_TOKEN;
+    const result = await readMemory();
+    expect(result.connection.connected).toBe(false);
+    expect(result.memory).toEqual([]);
+    expect(transport.calls).toEqual([]);
+  });
+  it("requires both read and write tools before claiming a connection", async () => {
+    transport.names = ["recall"];
+    expect((await readMemory()).connection.connected).toBe(false);
+  });
+  it("fails closed on recall errors without using cached or synthetic memory", async () => {
+    transport.failRecall = true;
+    const result = await readMemory();
+    expect(result.connection.connected).toBe(false);
+    expect(result.memory).toEqual([]);
+  });
+  it("writes attributed structured evidence and verifies it with an independent recall", async () => {
+    const entries = buildMemory([], [...initialRecords, followupRecord], []);
+    const saved = await writeMemory(entries, true);
+    expect(saved[0].remoteId).toBe("remote-1");
+    expect(transport.calls.map((c) => c.name)).toEqual(["remember", "recall"]);
+    const result = await readMemory();
+    expect(result.connection.connected).toBe(true);
+    expect(result.importedFollowup).toBe(true);
+    expect(result.memory[0].resolvedByEvidenceId).toBe(followupRecord.id);
+    expect(transport.calls[0].arguments.provenance).toContain("synthetic");
+  });
+  it("never treats a success response as proof when the subsequent read cannot find the write", async () => {
+    transport.dropWrite = true;
+    await expect(
+      writeMemory(
+        buildMemory([], [...initialRecords, followupRecord], []),
+        true,
+      ),
+    ).rejects.toThrow("could not be verified");
+  });
+  it("surfaces write denial instead of silently persisting local memory", async () => {
+    transport.failWrite = true;
+    await expect(writeMemory([], false)).rejects.toThrow("rejected");
+  });
+  it("resets only its own namespace and verifies removal", async () => {
+    await writeMemory(
+      buildMemory([], [...initialRecords, followupRecord], []),
+      true,
+    );
+    transport.facts.push({
+      fact_id: "foreign",
+      fact: "Unrelated workspace note",
+    });
+    await resetRemoteMemory();
+    expect(transport.facts).toEqual([
+      { fact_id: "foreign", fact: "Unrelated workspace note" },
+    ]);
+    expect(
+      transport.calls.some(
+        (c) => c.name === "forget" && c.arguments.id === "foreign",
+      ),
+    ).toBe(false);
+  });
+  it("rejects ambiguous recall tools", async () => {
+    transport.names = ["memory_recall", "other_recall", "remember"];
+    expect((await readMemory()).connection.connected).toBe(false);
+  });
 });

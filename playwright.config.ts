@@ -1,2 +1,25 @@
-import { defineConfig } from '@playwright/test';
-export default defineConfig({testDir:'./tests',testMatch:'**/*.e2e.ts',fullyParallel:false,workers:1,use:{channel:process.env.PLAYWRIGHT_CHANNEL,baseURL:'http://127.0.0.1:3102',viewport:{width:1440,height:900},trace:'retain-on-failure'},webServer:{command:'npm run dev -- --port 3102',url:'http://127.0.0.1:3102',reuseExistingServer:false,timeout:120000,env:{BIBLIOTECH_E2E:'1',GBRAIN_TOKEN:'',BIBLIOTECH_DATA_DIR:'.data/e2e'}},reporter:'list'});
+import { defineConfig } from "@playwright/test";
+export default defineConfig({
+  testDir: "./tests",
+  testMatch: "**/*.e2e.ts",
+  fullyParallel: false,
+  workers: 1,
+  use: {
+    channel: process.env.PLAYWRIGHT_CHANNEL,
+    baseURL: "http://127.0.0.1:3102",
+    viewport: { width: 1440, height: 900 },
+    trace: "retain-on-failure",
+  },
+  webServer: {
+    command: "npm run dev -- --port 3102",
+    url: "http://127.0.0.1:3102",
+    reuseExistingServer: false,
+    timeout: 120000,
+    env: {
+      BIBLIOTECH_E2E: "1",
+      GBRAIN_TOKEN: "",
+      BIBLIOTECH_DATA_DIR: ".data/e2e",
+    },
+  },
+  reporter: "list",
+});
