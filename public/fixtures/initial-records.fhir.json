@@ -1,0 +1,986 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://bibliotech.demo/tags",
+        "code": "synthetic",
+        "display": "Synthetic demo data"
+      }
+    ]
+  },
+  "entry": [
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Patient/demo-jordan-taylor",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "demo-jordan-taylor",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": "Taylor",
+            "given": [
+              "Jordan"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1975-05-18",
+        "address": [
+          {
+            "state": "CA",
+            "country": "US"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2026-0210",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2026-0210",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Annual wellness visit. Blood pressure: 136/84. Medication reconciliation performed."
+          }
+        ],
+        "period": {
+          "start": "2026-02-10"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2026-MED",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2026-MED",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Medication reconciliation note. Patient reports taking atorvastatin 20 mg daily. Current dose requires confirmation."
+          }
+        ],
+        "period": {
+          "start": "2026-02-10"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2026-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2026-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 149 mg/dL · HDL: 57 mg/dL · Triglycerides: 109 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2026-01-22",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 149,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/MedicationStatement/MED-2025-1015",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "MED-2025-1015",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "active",
+        "note": [
+          {
+            "text": "Atorvastatin 10 mg daily. Started October 15, 2025."
+          }
+        ],
+        "effectiveDateTime": "2025-10-15",
+        "medicationCodeableConcept": {
+          "text": "Atorvastatin 10 mg daily"
+        },
+        "dosage": [
+          {
+            "text": "Atorvastatin 10 mg daily. Started October 15, 2025."
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/DiagnosticReport/DR-2025-0604-MAMMO",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "DR-2025-0604-MAMMO",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "effectiveDateTime": "2025-06-04",
+        "code": {
+          "text": "Screening Mammogram"
+        },
+        "conclusion": "Breast arterial calcifications noted incidentally. Breast finding otherwise benign."
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2025-DERM",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2025-DERM",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Routine skin examination. Routine skin examination. Sun protection discussed."
+          }
+        ],
+        "period": {
+          "start": "2025-04-11"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2025-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2025-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 152 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2025-03-05",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 152,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2025-BP",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2025-BP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "138/86 mmHg"
+          }
+        ],
+        "effectiveDateTime": "2025-02-17",
+        "code": {
+          "text": "Blood Pressure"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 138,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 86,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Procedure/PROC-2024-GI",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "PROC-2024-GI",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "completed",
+        "note": [
+          {
+            "text": "Screening examination completed. No polyps reported."
+          }
+        ],
+        "performedDateTime": "2024-07-19",
+        "code": {
+          "text": "Screening colonoscopy"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2024-GI",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2024-GI",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Screening colonoscopy referral. Routine screening colonoscopy recommended."
+          }
+        ],
+        "period": {
+          "start": "2024-04-04"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/DiagnosticReport/DR-2024-0312",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "DR-2024-0312",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "effectiveDateTime": "2024-03-12",
+        "code": {
+          "text": "Diagnostic Mammogram"
+        },
+        "conclusion": "Probably benign focal asymmetry in the left breast. 6-month diagnostic mammographic follow-up recommended."
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2024-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2024-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 146 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2024-03-05",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 146,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2024-BP",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2024-BP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "134/84 mmHg"
+          }
+        ],
+        "effectiveDateTime": "2024-02-17",
+        "code": {
+          "text": "Blood Pressure"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 134,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 84,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2023-ORTHO",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2023-ORTHO",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Knee follow-up. Knee discomfort improved following physical therapy."
+          }
+        ],
+        "period": {
+          "start": "2023-08-21"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2023-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2023-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 135 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2023-03-05",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 135,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2023-BP",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2023-BP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "129/81 mmHg"
+          }
+        ],
+        "effectiveDateTime": "2023-02-17",
+        "code": {
+          "text": "Blood Pressure"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 129,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 81,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2022-DERM",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2022-DERM",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Skin review. Benign skin findings documented. Routine care discussed."
+          }
+        ],
+        "period": {
+          "start": "2022-05-06"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2022-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2022-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 128 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2022-03-05",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 128,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2022-BP",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2022-BP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "124/78 mmHg"
+          }
+        ],
+        "effectiveDateTime": "2022-02-17",
+        "code": {
+          "text": "Blood Pressure"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 124,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 78,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2021-PCP",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2021-PCP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Preventive care visit. Preventive care reviewed. Regular activity discussed."
+          }
+        ],
+        "period": {
+          "start": "2021-11-08"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Observation/OBS-2021-LDL",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-2021-LDL",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "final",
+        "note": [
+          {
+            "text": "LDL: 122 mg/dL"
+          }
+        ],
+        "effectiveDateTime": "2021-03-05",
+        "code": {
+          "text": "Lipid Panel"
+        },
+        "valueQuantity": {
+          "value": 122,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2020-PCP",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2020-PCP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Primary care check-in. General health review. No medication changes recorded."
+          }
+        ],
+        "period": {
+          "start": "2020-09-14"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Procedure/PROC-2019-ORTHO",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "PROC-2019-ORTHO",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "completed",
+        "note": [
+          {
+            "text": "Physical therapy course for knee discomfort completed."
+          }
+        ],
+        "performedDateTime": "2019-06-10",
+        "code": {
+          "text": "Physical therapy completed"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Procedure/PROC-2018-VAX",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "PROC-2018-VAX",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "completed",
+        "note": [
+          {
+            "text": "Seasonal influenza immunization documented."
+          }
+        ],
+        "performedDateTime": "2018-10-08",
+        "code": {
+          "text": "Seasonal immunization"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://bibliotech.example/fhir/Encounter/ENC-2018-PCP",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-2018-PCP",
+        "meta": {
+          "tag": [
+            {
+              "system": "https://bibliotech.demo/tags",
+              "code": "synthetic",
+              "display": "Synthetic demo data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/demo-jordan-taylor"
+        },
+        "status": "finished",
+        "type": [
+          {
+            "text": "Establish care. Baseline medical and preventive-care history recorded."
+          }
+        ],
+        "period": {
+          "start": "2018-05-24"
+        },
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        }
+      }
+    }
+  ]
+}

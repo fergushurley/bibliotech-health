@@ -1,0 +1,22 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "DR-2024-0918",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://bibliotech.demo/tags",
+        "code": "synthetic",
+        "display": "Synthetic demo data"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/demo-jordan-taylor"
+  },
+  "status": "final",
+  "effectiveDateTime": "2024-09-18",
+  "code": {
+    "text": "6-Month Follow-up Diagnostic Mammogram"
+  },
+  "conclusion": "Stable appearance compared with prior examination. Return to routine annual screening."
+}
