@@ -1,12 +1,12 @@
 # BiblioTech Health — hackathon demo script
 
 **Target length:** 105–115 seconds, including clicks.  
-**Hook:** All your priors. One intelligence.  
+**Hook:** All your prior test results. Intelligence for your body.
 **Recording:** 1440 × 900. Use the populated synthetic demo at `http://127.0.0.1:3101/priors`.
 
 | Time      | Show / action                                                                                                               | Say                                                                                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0:00–0:10 | Start on **Priors**, with the title and record counts visible.                                                              | “All your priors. One intelligence. BiblioTech connects your medical history across specialties into evidence-grounded intelligence.”                                                     |
+| 0:00–0:10 | Start on **Priors**, with the title and record counts visible.                                                              | “All your prior test results. Intelligence for your body. BiblioTech connects your medical history across specialties into evidence-grounded intelligence.”                                                     |
 | 0:10–0:22 | Scroll through the timeline. Briefly open a source record, then close it.                                                   | “This is a completely fictional patient: twenty-five synthetic records, eight years, six specialties. Labs, imaging, medications, and notes become one history you can actually inspect.” |
 | 0:22–0:35 | Click **Prepare My Visit**. Show the three cards on **Visit Brief**.                                                        | “Prepare My Visit surfaces three questions: an imaging follow-up needing confirmation, a potential connection across specialties, and a medication dose discrepancy.”                     |
 | 0:35–0:49 | Open **View Evidence** on the cardiovascular card. Scroll just enough to show the graph’s conclusion.                       | “Here, an imaging observation connects with lipid and blood-pressure trends. Every source is linked. The finding preserves uncertainty and asks for clinician review.”                    |
@@ -14,7 +14,7 @@
 | 1:03–1:20 | Open **Memory → Import New Record → Import Record**. Show the local follow-up match.                                        | “Now add the missing follow-up report. It matches the original recommendation, updates the evidence, and retires the old brief.”                                                          |
 | 1:20–1:32 | Click **Start Fresh Session**, then **Prepare My Visit**. Show the two remaining findings and the matched-follow-up banner. | “Start a fresh session and prepare again. The record persists, and the outdated missing-report question is gone.”                                                                         |
 | 1:32–1:45 | Show the landing page’s integration section, or stay on **Memory** with the connection status visible.                      | “GBrain is our memory integration; QM is planned for repeatable agent orchestration. This recording demonstrates local persistence, with live integration work clearly labeled.”          |
-| 1:45–1:52 | End on the product title or landing-page headline.                                                                          | “Clearer questions. Evidence you can inspect. BiblioTech Health. All your priors. One intelligence.”                                                                                      |
+| 1:45–1:52 | End on the product title or landing-page headline.                                                                          | “Clearer questions. Evidence you can inspect. BiblioTech Health. All your prior test results. Intelligence for your body.”                                                                                      |
 
 ## Before recording
 

@@ -81,9 +81,9 @@ export default function Landing() {
               YOUR HISTORY. YOUR ADVANTAGE.
             </div>
             <h1>
-              All your priors.
+              All your prior test results.
               <br />
-              <em>One intelligence.</em>
+              <em>Intelligence for your body.</em>
             </h1>
             <p>
               BiblioTech connects your medical history across specialties and
@@ -659,7 +659,7 @@ export default function Landing() {
           <div className="lp-closing-mark">
             <Sparkles size={25} />
           </div>
-          <span className="lp-eyebrow">ALL YOUR PRIORS. ONE INTELLIGENCE.</span>
+          <span className="lp-eyebrow">ALL YOUR PRIOR TEST RESULTS. INTELLIGENCE FOR YOUR BODY.</span>
           <h2>
             Your next visit deserves
             <br />
@@ -685,7 +685,7 @@ export default function Landing() {
             BiblioTech<small>HEALTH</small>
           </span>
         </Link>
-        <p>All your priors. One intelligence.</p>
+        <p>All your prior test results. Intelligence for your body.</p>
         <div>
           <a href="#intelligence">GBrain + QM</a>
           <Link href="/priors">
