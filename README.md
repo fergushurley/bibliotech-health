@@ -1,14 +1,17 @@
 # BiblioTech Health
 
+**[▶ Watch the 108-second product demo](docs/bibliotech-demo.mp4)**
+
+[![Watch the BiblioTech demo](docs/screenshots/08-landing.png)](docs/bibliotech-demo.mp4)
+
 ## All your prior test results. Intelligence for your body.
 
 BiblioTech connects your medical history across specialties and turns it into evidence-grounded intelligence you can inspect, correct, and carry with you.
 
 Explore a connected medical timeline, prepare questions for your next appointment, inspect the evidence behind every finding, and see your brief change when new information arrives.
 
-![BiblioTech landing page](docs/screenshots/08-landing.png)
 
-**[Watch or download the 108-second demo](docs/bibliotech-demo.mp4)** · **[Demo script](docs/hackathon-demo-script.md)** · **[MIT license](LICENSE)**
+**[Demo script](docs/hackathon-demo-script.md)** · **[MIT license](LICENSE)**
 
 ## What you can do
 
