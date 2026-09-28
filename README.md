@@ -56,6 +56,46 @@ The server binds to loopback. Records and the access ledger persist in `.data/de
 
 The supplied patient, Jordan Taylor, and every clinical record are fictional. The import accepts only the supplied fixture, not arbitrary medical uploads.
 
+## Product screenshots
+
+Actual screens from the populated synthetic demo. Select any image to open it at full resolution.
+
+### 1. Priors — your connected history
+
+Explore 25 records across eight years and six specialties, with timeline filters and inspectable source records.
+
+[![Priors: populated record timeline and history summary](docs/screenshots/01-priors.png)](docs/screenshots/01-priors.png)
+
+### 2. Visit Brief — questions worth discussing
+
+Three evidence-supported questions highlight an imaging follow-up, cross-specialty context, and a medication dose discrepancy.
+
+[![Visit Brief: three findings with linked evidence and questions for a clinician](docs/screenshots/02-visit-brief.png)](docs/screenshots/02-visit-brief.png)
+
+### 3. Evidence — follow every connection
+
+An evidence map connects an imaging observation with lipid and blood-pressure trends, alongside source records and the reviewer’s assessment.
+
+[![Evidence: cross-specialty graph, original sources, and reviewer assessment](docs/screenshots/03-evidence.png)](docs/screenshots/03-evidence.png)
+
+### 4. Agents — inspect the workflow
+
+Review five completed stages, their data scopes, and the unsupported claims rejected by the deterministic reviewer.
+
+[![Agents: completed workflow stages and rejected claims](docs/screenshots/04-agents.png)](docs/screenshots/04-agents.png)
+
+### 5. Memory — update the story with new evidence
+
+The imported follow-up report is matched to the original recommendation. This screenshot shows **local reconciliation with GBrain disconnected**, not a verified remote-memory update.
+
+[![Memory: GBrain connection status and locally matched follow-up report](docs/screenshots/05-gbrain-memory.png)](docs/screenshots/05-gbrain-memory.png)
+
+### 6. Access — see who requested what
+
+Inspect the purpose, scope, and result of each data request, including the denied Research Agent request.
+
+[![Access: populated audit ledger with allowed and denied requests](docs/screenshots/06-access-ledger.png)](docs/screenshots/06-access-ledger.png)
+
 ## GBrain and QM
 
 | Component | Role | Current status |
@@ -130,10 +170,6 @@ PLAYWRIGHT_CHANNEL=chrome npm run test:e2e
 ```
 
 The browser suite starts a separate server on port 3102 with isolated data and GBrain disabled. It verifies source navigation, import and fresh-session behavior, denied access, browser errors, and mobile layout. Actual product screenshots are saved in `docs/screenshots/`.
-
-| Visit brief | Evidence |
-| --- | --- |
-| ![Visit brief](docs/screenshots/02-visit-brief.png) | ![Evidence](docs/screenshots/03-evidence.png) |
 
 ## Prototype scope
 
