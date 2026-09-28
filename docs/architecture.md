@@ -4,6 +4,16 @@
 
 FHIR is canonical. The store persists sources, runs, pending writes, namespaces and access events to `.data/state.json` via a serialized queue, a temporary file and atomic rename (0600). Workflow mutations are serialized. This is a **single-process prototype**: do not run the standalone CLI concurrently with the web process against that store. There is no distributed or cross-process lock, authentication, encryption-at-rest, or clinical-grade authorization. Keep the loopback binding and use synthetic data only.
 
+The Cloudflare deployment uses the same workflow service with a different store.
+Each browser receives a random 256-bit session cookie (`HttpOnly`, `Secure`,
+`SameSite=Lax`); each cookie maps to a separate SQLite Durable Object. The object
+serializes requests and persists state across Worker restarts. Sessions expire
+after 24 hours using a storage alarm. Public history is bounded to the most recent
+100 access events and 10 runs. Reset affects only that browser's synthetic data.
+Writes require a matching Origin and JSON content, accept at most 1 KiB, and are
+limited to 30 actions per minute per session. This is a synthetic demo session
+boundary, not a user account system or authorization for real patient records.
+
 The timeline, follow-up, medication, cross-specialty and reviewer stages run deterministic code. They record actual source accesses, stage completion, candidate counts and rejections. No finding reaches the brief or memory without nonempty resolvable evidence IDs and explicit uncertainty. Medication review counts prescription records; it makes no treatment recommendation. The initial brief has three candidates and zero rejected candidates; rejection logic is exercised with deliberately invalid inputs in tests.
 
 The imaging follow-up resolves only for a final report with the same patient, an explicit `DiagnosticReport.basedOn` reference to the ServiceRequest, and an appropriate date. An unrelated mammogram does not resolve it. See the [FHIR R4 report relationship](https://hl7.org/fhir/R4/diagnosticreport.html). Evidence status and follow-up lifecycle are independent: a verified source can support a resolved follow-up, and a saved review preference can have lifecycle `reviewed` without changing source evidence status.

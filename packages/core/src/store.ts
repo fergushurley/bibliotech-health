@@ -1,30 +1,21 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { seedResources } from "../../demo-data/src/index";
 import type { AppState } from "./index";
+import { initialState, type StateStore } from "./state";
+export { initialState } from "./state";
 export function projectRoot() {
   return process.cwd().endsWith(path.join("apps", "web"))
     ? path.resolve(process.cwd(), "../..")
     : process.cwd();
 }
-export function initialState(): AppState {
-  return {
-    version: 1,
-    namespace: `bibliotech-${randomUUID()}`,
-    sessionId: randomUUID(),
-    resources: seedResources(),
-    runs: [],
-    access: [],
-    memory: [],
-    pendingMemory: [],
-    imported: false,
-  };
-}
-export class JsonStore {
+export class JsonStore implements StateStore {
   private queue: Promise<unknown> = Promise.resolve();
   constructor(
-    readonly file = path.join(projectRoot(), ".data", "state.json"),
+    readonly file = path.join(
+      process.env.BIBLIOTECH_DATA_DIR || path.join(projectRoot(), ".data"),
+      "state.json",
+    ),
   ) {}
   private async load(): Promise<AppState> {
     try {

@@ -8,6 +8,8 @@ export default ts.config(
       "**/next-env.d.ts",
       "playwright-report/**",
       "test-results/**",
+      "apps/web/dist/**",
+      "apps/web/.wrangler/**",
     ],
   },
   js.configs.recommended,

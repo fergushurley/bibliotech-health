@@ -1,5 +1,7 @@
 # Logs
 .data/
+.wrangler/
+.dev.vars*
 test-results/
 playwright-report/
 .DS_Store

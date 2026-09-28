@@ -25,3 +25,22 @@ Unit tests cover all supported FHIR types, invalid evidence rejection, comparabl
 Local GBrain uses the installed store through MCP stdio and local user permissions. Hosted Streamable HTTP authentication/permission behavior remains unverified. No hosted token was used. Live QM runtime verification remains pending; its skill format and shared CLI were checked. No QM memory provider, live QM orchestration, arbitrary import, optional LLM synthesis, deployment, or real patient support is claimed.
 
 The local JSON store is safe for one application process with serialized operations; multi-process/distributed persistence is deferred. The deterministic reviewer validates references and limited wording, not arbitrary clinical correctness. The UI access ledger demonstrates a local resource-class policy and is not a provider audit log.
+
+## Public Cloudflare preparation — September 27, 2026
+
+The Cloudflare build now uses vinext and separate SQLite Durable Objects for
+anonymous demo sessions. Both the Cloudflare build and the original Next.js build
+passed. Lint, separate Node/Cloudflare type checks, all 25 unit tests, and Wrangler's
+deployment dry run passed.
+
+Tests against the actual local Cloudflare runtime verified two isolated visitors,
+prepare/import/reset, same-origin rejection, oversized and malformed request
+rejection, page assets, persistence after restarting the Worker, the 30-actions-
+per-minute limit and bounded activity history. Browser verification confirmed
+navigation from priors to a three-item visit brief, accurate public-demo wording,
+and no captured browser errors or warnings.
+
+No hosted GBrain connection was configured or verified. No production deployment,
+DNS change or external TLS verification has occurred. Cloudflare's GitHub
+connection is awaiting owner approval. The optional Docker image was not tested
+because Docker is unavailable on the development machine.

@@ -14,8 +14,13 @@
   "scripts": {
     "dev": "npm run dev --workspace @bibliotech/web",
     "build": "npm run build --workspace @bibliotech/web",
+    "build:cloudflare": "npm run build:vinext --workspace @bibliotech/web",
+    "dev:cloudflare": "npm run dev:vinext --workspace @bibliotech/web",
+    "preview:cloudflare": "npm run start:vinext --workspace @bibliotech/web",
+    "deploy:cloudflare": "npm run deploy:vinext --workspace @bibliotech/web",
+    "typecheck:cloudflare": "tsc --noEmit -p apps/web/cloudflare/tsconfig.json",
     "start": "npm run start --workspace @bibliotech/web",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && npm run typecheck:cloudflare",
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -29,6 +34,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "5.20260927.1",
     "@eslint/js": "^9.0.0",
     "@playwright/test": "^1.55.0",
     "@types/node": "^24.0.0",

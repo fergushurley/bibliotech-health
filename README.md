@@ -15,6 +15,22 @@ npm run dev
 
 Open <http://127.0.0.1:3000>. The server binds to loopback. The root `.env.local`, `.data/` store, and generated reports are gitignored. If Node is supplied by a desktop application's bundled runtime without npm, install npm from the official npm registry and put both executables on PATH first. The repository itself does not rely on a machine-specific runtime path.
 
+### Public Cloudflare deployment
+
+Cloudflare Workers deployment is configured for `www.biblio.tech`. Each visitor
+gets an isolated synthetic demo in a SQLite Durable Object, identified by an
+HTTP-only secure cookie. Sessions expire after 24 hours. Public resets affect
+only that visitor. The local Node app retains its existing JSON store and local
+GBrain integration. See [hosting setup](docs/hosting.md) for deployment commands
+and the remaining account connection step.
+
+```sh
+npm run build:cloudflare
+npm run preview:cloudflare
+# After Cloudflare deployment credentials are configured:
+npm run deploy:cloudflare
+```
+
 ### GBrain
 
 The verified demo uses **real local GBrain 0.59.0.0 via MCP stdio**, selected after the local installation became available. Set `GBRAIN_MODE=local` and `GBRAIN_BIN` to the absolute installed `gbrain` executable. Its sibling Bun executable is added to the child PATH. This uses your existing GBrain configuration/store. Only synthetic derived notes under `bibliotech/<demo-namespace>/` are written. Automatic background sweep is disabled for this client.
@@ -37,7 +53,10 @@ No mock fallback exists in the application. Missing permissions, connection fail
 5. **Fresh Session** clears the brief and recalled cache, keeps the namespace, and performs a new GBrain read. Prepare again: the follow-up question stays resolved.
 6. Mark a measurement item reviewed, start a fresh session, and prepare again. The unchanged FHIR now produces a brief that remembers the review state.
 
-Reset is development-only. It restores 27 FHIR resources (26 timeline events plus the patient) and creates a new namespace; old GBrain notes are retained. The imported report adds one resource.
+Reset is development-only in the shared Node app, and is available within each
+isolated public demo session. It restores 27 FHIR resources (26 timeline events
+plus the patient) and creates a new namespace; old GBrain notes are retained.
+The imported report adds one resource.
 
 ## Validate
 
@@ -52,4 +71,6 @@ npm run test:e2e        # Running development server + local Chrome; UI smoke te
 
 Production build uses Next.js's webpack compiler because the bundled runtime's sandbox blocked a Turbopack CSS worker. The development server uses Turbopack. Tests use an explicitly identified in-memory double only inside the test suite; `rehearse` requires the real provider.
 
-See [architecture and safety](docs/architecture.md), [QM integration](docs/qm.md), and [verification results](docs/verification.md). Live QM orchestration, a QM memory provider, arbitrary imports, optional LLM synthesis, deployment, and real patient use are deferred.
+See [architecture and safety](docs/architecture.md), [QM integration](docs/qm.md),
+and [verification results](docs/verification.md). Live QM orchestration, a QM memory
+provider, arbitrary imports, optional LLM synthesis, and real patient use are deferred.

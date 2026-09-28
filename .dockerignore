@@ -1,0 +1,16 @@
+.git
+**/node_modules
+**/.next
+**/dist
+**/.wrangler
+**/.vinext
+**/.dev.vars*
+**/.env
+**/.env.*
+**/.data
+test-results
+playwright-report
+**/*.log
+**/*.tsbuildinfo
+.codex
+.agents

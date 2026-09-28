@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bibliotech-health",
+  "account_id": "6d48d907ee652c28c865d520b3dab883",
+  "compatibility_date": "2026-09-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "cloudflare/worker.ts",
+  "workers_dev": true,
+  "routes": [{ "pattern": "www.biblio.tech", "custom_domain": true }],
+  "vars": { "GBRAIN_MODE": "hosted" },
+  "durable_objects": {
+    "bindings": [{ "name": "DEMO_SESSIONS", "class_name": "DemoSession" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DemoSession"] }],
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS",
+  },
+}

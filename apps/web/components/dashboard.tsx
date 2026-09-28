@@ -41,6 +41,8 @@ type ViewState = Omit<AppState, "resources"> & {
   evidence: EvidenceReference[];
   tokenConfigured: boolean;
   development: boolean;
+  publicDemo?: boolean;
+  canReset?: boolean;
 };
 const nav = [
   ["priors", "Your priors", BookOpen],
@@ -89,7 +91,7 @@ export default function Dashboard({
   const router = useRouter();
   const refresh = useCallback(async () => {
     const response = await fetch("/api/state", { cache: "no-store" });
-    if (!response.ok) throw new Error("Could not load the local record.");
+    if (!response.ok) throw new Error("Could not load the demo record.");
     setData(await response.json());
   }, []);
   useEffect(() => {
@@ -232,7 +234,10 @@ export default function Dashboard({
             </div>
           </div>
           <div className="local-note">
-            <LockKeyhole size={13} /> Your priors stay on this device
+            <LockKeyhole size={13} />
+            {data?.publicDemo
+              ? "Your demo session expires after 24 hours"
+              : "Your priors stay on this device"}
           </div>
         </div>
       </aside>
@@ -620,9 +625,9 @@ export default function Dashboard({
                         Your records are the source. Memory connects the dots.
                       </h2>
                       <p>
-                        GBrain holds derived notes with provenance. Raw FHIR
-                        records remain on this device. These notes can be read
-                        by another authorized assistant.
+                        {data.publicDemo
+                          ? "This public demo uses fictional records in your own temporary session. When GBrain is connected, only derived notes with provenance are sent to it."
+                          : "GBrain holds derived notes with provenance. Raw FHIR records remain on this device. These notes can be read by another authorized assistant."}
                       </p>
                     </div>
                     <a
@@ -860,12 +865,15 @@ export default function Dashboard({
                   <button disabled={!!busy} onClick={() => action("fresh")}>
                     Fresh Session
                   </button>
-                  {data.development && (
+                  {(data.development || data.canReset) && (
                     <button disabled={!!busy} onClick={() => action("reset")}>
                       Reset Demo
                     </button>
                   )}
-                  <span>FHIR R4 · Local prototype</span>
+                  <span>
+                    FHIR R4 ·{" "}
+                    {data.publicDemo ? "Public demo" : "Local prototype"}
+                  </span>
                 </div>
               </footer>
             </>

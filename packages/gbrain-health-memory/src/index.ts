@@ -83,7 +83,7 @@ export class GBrainMemory implements HealthMemory {
     const local = process.env.GBRAIN_MODE === "local";
     if (!local && !this.token?.trim())
       throw new MemoryUnavailable(
-        "GBrain is not connected. Add GBRAIN_TOKEN to the project .env.local with Full memory access.",
+        "GBrain is not connected to this demo. Visit preparation remains available; persistent memory is unavailable.",
       );
     const binary = process.env.GBRAIN_BIN;
     if (local && !binary)

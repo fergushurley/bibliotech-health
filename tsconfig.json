@@ -21,5 +21,11 @@
     "tests/**/*.ts",
     "*.ts"
   ],
-  "exclude": ["node_modules", "apps/web/.next"]
+  "exclude": [
+    "node_modules",
+    "apps/web/.next",
+    "apps/web/dist",
+    "apps/web/cloudflare",
+    "tests/cloudflare.test.ts"
+  ]
 }
