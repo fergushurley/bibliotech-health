@@ -1,5 +1,7 @@
 # BiblioTech Health
 
+**[Open the public website](https://www.biblio.tech/health)** · **[Try the demo](https://www.biblio.tech/health/priors)**
+
 **[▶ Watch the 114-second product demo](docs/bibliotech-demo.mp4)**
 
 [![Watch the BiblioTech demo](docs/screenshots/08-landing.png)](docs/bibliotech-demo.mp4)
@@ -34,7 +36,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://127.0.0.1:3101](http://127.0.0.1:3101) for the marketing page or [http://127.0.0.1:3101/priors](http://127.0.0.1:3101/priors) for the demo. No credentials are needed for the local workflow. To change the port, use `npm run dev -- --port 3201`.
+Open [http://127.0.0.1:3101/health](http://127.0.0.1:3101/health) for the marketing page or [http://127.0.0.1:3101/health/priors](http://127.0.0.1:3101/health/priors) for the demo. No credentials are needed for the local workflow. To change the port, use `npm run dev -- --port 3201`.
 
 For a production build running locally:
 
@@ -44,6 +46,23 @@ npm start
 ```
 
 The server binds to loopback. Records and the access ledger persist in `.data/demo.json`; that directory is excluded from Git.
+
+## Cloudflare hosting
+
+The public site deploys the alternative product from `codex/cloudflare-alternative` to the `bibliotech-health` Worker. Cloudflare Builds uses Node.js 24, `npm run build:cloudflare`, and `npm run deploy:cloudflare` from the repository root.
+
+All product pages are mounted at `/health`: `/health/priors`, `/health/brief`, `/health/agents`, `/health/memory`, `/health/access`, and `/health/insights/cross-specialty-cardiovascular`. The homepage and legacy product links redirect to their `/health` equivalents.
+
+Each public visitor receives an isolated Durable Object session that expires after 24 hours. Only synthetic records are accepted. GBrain is disconnected in the public demo; no shared account credentials are included in the build. Local Next.js development retains the optional GBrain connector.
+
+To preview the Cloudflare build locally:
+
+```sh
+npm run build:cloudflare
+npm run preview:cloudflare -- --port 8788 --local-upstream 127.0.0.1:8788
+```
+
+Open `http://127.0.0.1:8788/health`. The explicit local upstream keeps the production HTTPS redirect from being applied to the local preview.
 
 ## Two-minute walkthrough
 
