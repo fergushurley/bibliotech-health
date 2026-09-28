@@ -5,17 +5,17 @@ test("the entire evidence, import and fresh-session demo works", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  const reset = await request.post("/api/demo", {
+  const reset = await request.post("/health/api/demo", {
     headers: { Origin: "http://127.0.0.1:3102" },
     data: { action: "reset", resetGBrain: false },
   });
   expect(reset.status()).toBe(200);
-  const denied = await request.post("/api/demo", {
+  const denied = await request.post("/health/api/demo", {
     headers: { Origin: "https://unrelated.example" },
     data: { action: "prepare" },
   });
   expect(denied.status()).toBe(403);
-  await page.goto("/priors");
+  await page.goto("/health/priors");
   await expect(
     page.getByRole("heading", { name: "Your Priors" }),
   ).toBeVisible();
@@ -140,7 +140,7 @@ test("phone layout has no horizontal overflow and can open a source", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/priors");
+  await page.goto("/health/priors");
   await expect(page.getByText("Jordan Taylor", { exact: true })).toBeVisible();
   expect(
     await page.evaluate(

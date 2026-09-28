@@ -1,25 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { initialRecords } from "./data";
+import { initialState } from "./initial-state";
+export { initialState } from "./initial-state";
 import type { DemoState } from "./types";
 const globalStore = globalThis as typeof globalThis & {
   bibliotechQueue?: Promise<unknown>;
 };
 export const stateDirectory = () =>
   process.env.BIBLIOTECH_DATA_DIR || path.join(process.cwd(), ".data");
-export function initialState(): DemoState {
-  return {
-    records: structuredClone(initialRecords),
-    run: null,
-    ledger: [],
-    memory: [],
-    connection: {
-      connected: false,
-      message: "GBrain isn't connected. Persistent memory is unavailable.",
-      checkedAt: new Date().toISOString(),
-    },
-  };
-}
 export async function loadState(): Promise<DemoState> {
   try {
     return JSON.parse(

@@ -9,3 +9,8 @@ next-env.d.ts
 playwright-report/
 test-results/
 .DS_Store
+
+dist/
+.vinext/
+.wrangler/
+.dev.vars*

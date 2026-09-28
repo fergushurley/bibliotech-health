@@ -12,7 +12,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run dev -- --port 3102",
-    url: "http://127.0.0.1:3102",
+    url: "http://127.0.0.1:3102/health",
     reuseExistingServer: false,
     timeout: 120000,
     env: {

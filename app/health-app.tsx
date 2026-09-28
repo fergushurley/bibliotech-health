@@ -264,7 +264,7 @@ export default function HealthApp() {
     [memoryTab, setMemoryTab] = useState("All");
   useEffect(() => {
     let valid = true;
-    fetch("/api/demo")
+    fetch("/health/api/demo")
       .then(async (r) => {
         const data = await r.json();
         if (!r.ok) throw new Error(data.error);
@@ -303,7 +303,7 @@ export default function HealthApp() {
           : "",
     );
     try {
-      const response = await fetch("/api/demo", {
+      const response = await fetch("/health/api/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: kind, ...extra }),
@@ -341,13 +341,15 @@ export default function HealthApp() {
         if (kind === "fresh") {
           router.push("/priors");
           setToast(
-            "Fresh session started. Your records and GBrain memory are preserved.",
+            state?.publicDemo ? "Fresh session started. Your demo records are preserved." : "Fresh session started. Your records and GBrain memory are preserved.",
           );
         }
         if (kind === "reset") {
           router.push("/priors");
           setToast(
-            resetGBrain
+            state?.publicDemo
+              ? "Your demo session was reset."
+              : resetGBrain
               ? "Demo records and demo memory reset."
               : "Local demo reset. GBrain memory was preserved.",
           );
@@ -473,7 +475,7 @@ export default function HealthApp() {
             <span />
             Synthetic Demo
           </span>
-          <small>Evidence-grounded. Patient-owned.</small>
+          <small>{state?.publicDemo ? "Your demo session expires after 24 hours." : "Evidence-grounded. Patient-owned."}</small>
         </div>
       </aside>
       <div className="workspace">
@@ -1900,14 +1902,13 @@ export default function HealthApp() {
           </div>
           {!connected && (
             <p className="import-notice">
-              GBrain is disconnected. The record can be imported locally;
-              persistent memory will remain unavailable until connected.
+              {state?.publicDemo ? "GBrain is disconnected. The record will be added to your isolated demo session." : "GBrain is disconnected. The record can be imported locally; persistent memory will remain unavailable until connected."}
             </p>
           )}
           <div className="modal-actions">
             <a
               className="text-button"
-              href="/fixtures/followup-mammogram-2024-09.json"
+              href="/health/fixtures/followup-mammogram-2024-09.json"
               download
             >
               Download fixture
@@ -1929,9 +1930,9 @@ export default function HealthApp() {
       {modal === "reset" && (
         <Modal title="Reset the synthetic demo" onClose={() => setModal(null)}>
           <p className="modal-description">
-            Restore the original 25 records and clear local briefs and access
-            events.
+            {state?.publicDemo ? "Restore the original 25 records and clear briefs and access events in your demo session." : "Restore the original 25 records and clear local briefs and access events."}
           </p>
+          {!state?.publicDemo && <>
           <label className="checkbox-label">
             <input
               type="checkbox"
@@ -1945,6 +1946,7 @@ export default function HealthApp() {
             or brief. Checking this removes only snapshots in this demo’s
             configured namespace.
           </p>
+          </>}
           <div className="modal-actions">
             <Button onClick={() => setModal(null)}>Cancel</Button>
             <Button
@@ -1959,6 +1961,10 @@ export default function HealthApp() {
       )}
       {modal === "connect" && (
         <Modal title="Connect GBrain memory" onClose={() => setModal(null)}>
+          {state?.publicDemo ? <p className="modal-description">
+            GBrain memory is not connected to this public demo. You can explore every screen,
+            prepare a brief, and import the synthetic follow-up in your own 24-hour demo session.
+          </p> : <>
           <p className="modal-description">
             Use a dedicated workspace containing synthetic demo data only.
           </p>
@@ -1980,6 +1986,7 @@ export default function HealthApp() {
             Tokens stay on the server. The app confirms writes with a separate
             memory read.
           </p>
+          </>}
           <div className="modal-actions">
             <a
               href="https://gbrain.io/docs/workspace/memory-anywhere"

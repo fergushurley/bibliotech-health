@@ -125,6 +125,7 @@ export type Connection = {
   workspaceUrl?: string;
 };
 export type DemoState = {
+  publicDemo?: boolean;
   records: HealthRecord[];
   run: Run | null;
   ledger: AccessEvent[];
