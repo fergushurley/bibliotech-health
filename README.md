@@ -1,6 +1,6 @@
 # BiblioTech Health
 
-**[▶ Watch the 108-second product demo](docs/bibliotech-demo.mp4)**
+**[▶ Watch the 114-second product demo](docs/bibliotech-demo.mp4)**
 
 [![Watch the BiblioTech demo](docs/screenshots/08-landing.png)](docs/bibliotech-demo.mp4)
 
