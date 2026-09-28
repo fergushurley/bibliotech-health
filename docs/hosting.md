@@ -7,6 +7,13 @@ Cloudflare's GitHub integration is connected to `fergushurley/bibliotech-health`
 The production branch is `codex/cloudflare-public`; pushing to that branch
 starts the configured build and deployment. Preview builds are disabled.
 
+The first deployment completed on September 27, 2026 (Pacific time). Both the
+custom domain and `https://bibliotech-health.fghurley.workers.dev` passed live
+checks for HTTPS, pages and assets, isolated visitor sessions, visit preparation,
+fixture import, reset, and cross-origin request rejection. The custom domain was
+checked against its authoritative DNS address while negative DNS caches expired.
+GBrain memory is not connected; the public UI reports this explicitly.
+
 ## Public runtime
 
 The UI uses Cloudflare's vinext adapter alongside the existing Next.js setup.

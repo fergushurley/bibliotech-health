@@ -5,8 +5,14 @@ export { DemoSession } from "./session";
 export default {
   async fetch(request: Request, env: Env, context: ExecutionContext) {
     const url = new URL(request.url);
-    if (url.hostname === "biblio.tech") {
-      url.hostname = "www.biblio.tech";
+    const publicHostname =
+      url.hostname === "www.biblio.tech" ||
+      url.hostname.endsWith(".workers.dev");
+    if (
+      url.hostname === "biblio.tech" ||
+      (publicHostname && url.protocol === "http:")
+    ) {
+      if (url.hostname === "biblio.tech") url.hostname = "www.biblio.tech";
       url.protocol = "https:";
       return Response.redirect(url.toString(), 308);
     }
