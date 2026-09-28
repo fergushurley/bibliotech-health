@@ -3,8 +3,9 @@
 The application is prepared for Cloudflare Workers in account
 `6d48d907ee652c28c865d520b3dab883`. The Worker is named `bibliotech-health` and
 its custom domain is `www.biblio.tech`. The domain already uses Cloudflare DNS.
-No deployment or DNS change has been made yet: Cloudflare's GitHub connection
-requires the owner's approval.
+Cloudflare's GitHub integration is connected to `fergushurley/bibliotech-health`.
+The production branch is `codex/cloudflare-public`; pushing to that branch
+starts the configured build and deployment. Preview builds are disabled.
 
 ## Public runtime
 
@@ -70,6 +71,9 @@ In **Workers & Pages → Create application → Continue with GitHub**, select o
 | Deploy command | `npm run deploy:cloudflare` |
 | Build environment | `NODE_VERSION=24` |
 | Custom domain | `www.biblio.tech` (defined in Wrangler config) |
+
+The build uses the owner-approved `bibliotech-health-builds` deployment token,
+managed by Cloudflare. No deployment credentials are stored in this repository.
 
 Do not add a hosted GBrain token to the build environment. It belongs in the
 Worker's runtime secrets. After deployment, verify HTTPS, `/api/health`, browser
